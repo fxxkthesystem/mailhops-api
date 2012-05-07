@@ -1,0 +1,27 @@
+This is the free version of the MailHops API
+
+By using this you must agree to the terms of use covered in http://www.mailhops.com/terms
+ 
+This version does not include a database
+
+Get the geoip file and unzip it
+
+wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+ 
+You can also setup a cron job to pull this monthly
+ 
+$ crontab -e
+ 
+#Sometimes maxmind updates on the 2nd others on the 6th
+0 0 10  * * /var/www/geoip/cron_get_geoip.sh
+ 
+Install Zend Framework Libs
+ 
+	Net/DNS
+	Net/DNSBL
+	Net/GeoIP
+
+Edit lib/MailHops.php
+
+	Set IMAGE_URL
+	Set GEOIP_FILE
