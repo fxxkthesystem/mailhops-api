@@ -15,11 +15,11 @@ $ crontab -e
 #Sometimes maxmind updates on the 2nd others on the 6th
 0 0 10  * * /var/www/geoip/cron_get_geoip.sh
  
-Install Zend Framework Libs
+Install Pear Libs
  
-	Net/DNS
-	Net/DNSBL
-	Net/GeoIP
+	pear install Net_DNS
+	pear install Net_DNSBL
+	pear install Net_GeoIP
 
 Edit lib/MailHops.php
 
