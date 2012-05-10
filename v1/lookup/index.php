@@ -6,13 +6,15 @@ $json_map = '';
 if(!empty($maintenance)){
 	$json_map = json_encode(array(
 				'meta'=>array(
-					'code'=>410),
+					'code'=>410
+					,'host'=>$_SERVER['SERVER_NAME']),
 				'error'=>array('message'=>$maintenance)));
 } else if(isset($_GET['watchmouse'])){
 	$json_map = json_encode(array(
 				'meta'=>array(
-					'code'=>200,
-					'message'=>'MailHops API Service Up'))
+					'code'=>200
+					,'message'=>'MailHops API Service Up'
+					,'host'=>$_SERVER['SERVER_NAME']))
 				);	
 } else{
 
@@ -20,7 +22,8 @@ if(!empty($maintenance)){
 	
 		$json_map = json_encode(array(
 				'meta'=>array(
-					'code'=>400),
+					'code'=>400
+					,'host'=>$_SERVER['SERVER_NAME']),
 				'error'=>array('message'=>'Missing route parameter')));
 				
 	} else {
@@ -28,7 +31,8 @@ if(!empty($maintenance)){
 		
 		$json_map = json_encode(array(
 						'meta'=>array(
-							'code'=>500),
+							'code'=>500
+							,'host'=>$_SERVER['SERVER_NAME']),
 						'error'=>array('message'=>'Server Error')));
 		
 		try{

@@ -17,20 +17,23 @@ class MailHops{
 	
 	private $total_kilometers	= 0;
 	
+	private $show_weather		= false;
+	
 	private $reverse_host		= true;
 	
-	//full image path
-	const IMAGE_URL 			= 'http://yourdomain/v1/images/';
+	private $db_on				= false;
 	
-	//from DOCUMENT_ROOT
+	const IMAGE_URL 			= 'http://api.mailhops.com/v1/images/';
+	
+	//path from DOCUMENT_ROOT
 	const IMAGE_DIR 			= '/v1/images/';
 	
-	//maxmind.com geoip file
+	//Path to GeoIP dat file
 	const GEOIP_FILE 			= '/var/www/geoip/GeoLiteCity.dat';
 	
-	//use google dns 8.8.8.8
-	const DNS_SERVER			= '8.8.8.8';
-	
+	//Google DNS server
+	const DNS_SERVER 			= '8.8.8.8';
+		
 	public function __construct(){
 
 		if(!empty($_GET['route']))
@@ -50,7 +53,13 @@ class MailHops{
 				$this->ips=array_reverse($this->ips);
 			else if(isset($_GET['tb']) && Util::getVersion($app_version) <= '05')
 				$this->ips=array_reverse($this->ips);
-		}		
+		}			
+		
+		//log the app and version, keep a daily count for stats
+		if(!empty($app_version)){
+			self::logApp($app_version);
+		}
+		
 	}
 	
 	public function setReverseHost($show){
@@ -62,6 +71,7 @@ class MailHops{
 	$show_client = isset($_GET['showclient'])&&!Util::toBoolean($_GET['showclient'])?false:true;
 	$show_client = isset($_GET['c'])&&!Util::toBoolean($_GET['c'])?false:$show_client;
 	$client_ip=self::getRealIpAddr();
+	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
 	//track start time
 	$time = microtime();
@@ -90,16 +100,25 @@ class MailHops{
 				$hostname=self::getRHost($ip);
 				if(!empty($hostname))
 					$route['host']=$hostname;
-				if($whois || (!$dnsbl_checked && $ip==$dnsbl_ip)){
+				if($whois || (!$is_mailhops_site && !$dnsbl_checked && $ip==$dnsbl_ip)){
 					$dnsbl_checked=true;
 					$route['dnsbl']=self::getDNSBL($ip);					
 				}	
 				
 				if(!empty($route['countryCode'])){
+					if(empty($route['countryName']))
+						$route['countryName']=self::getCountryName($route['countryCode']);
 					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
 				
+				if($this->db_on){
+					if(!empty($route['countryCode'])){
+						self::logCountry($route['countryCode'],$origin);
+						if($route['countryCode']=='US' && !empty($route['state']))
+							self::logState($route['state'],$origin);
+					}
+				} 
 				$origin++;
 			}
 			else
@@ -127,6 +146,8 @@ class MailHops{
 		}
 		if(!empty($route)){
 			if(!empty($route['countryCode'])){
+				if(empty($route['countryName']))
+					$route['countryName']=self::getCountryName($route['countryCode']);
 				if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
 					$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 			}
@@ -151,7 +172,8 @@ class MailHops{
 	return json_encode(array(
 		'meta'=>array(
 			'code'=>200
-			,'time'=>$total_time),
+			,'time'=>$total_time
+			,'host'=>$_SERVER['SERVER_NAME']),
 		'response'=>array(
 			'distance'=>array(
 				'miles'=>$this->total_miles
@@ -207,7 +229,8 @@ class MailHops{
 			if(substr($results['record'],0,7)=='127.0.0')
 				return array('listed'=>true,'record'=>$results['record']);
 			else
-				return array('listed'=>false);				
+				return array('listed'=>false);
+				
 		}
 		
 		return array('listed'=>false);
@@ -227,7 +250,6 @@ class MailHops{
 	{
 		if(isset($this) && !$this->reverse_host)
 			return '';
-		
 		$output = exec('host '.$ip.' '.self::DNS_SERVER);
 		if(!empty($output) && strstr($output,'name pointer')){
 			//parse host
@@ -288,7 +310,7 @@ class MailHops{
 		catch(Exception $ex){
 			error_log($ex->getMessage().' MaxMind '.$ip);
 		}
-				
+		
 		return $loc_array;		
 	}
 	
@@ -335,7 +357,7 @@ class MailHops{
 		
 		return $loc_array;		
 	}
-		
+	
 	private function displayState($state){
 	
 		if(is_numeric($state))
@@ -346,7 +368,6 @@ class MailHops{
 		}
 		return true;
 	}
-	
 		
 	public function isPrivate($ip){
 		
@@ -398,35 +419,108 @@ class MailHops{
 	
 		return $dist;
 	}  
-					
-	private function getWeatherImage($condition){
-		switch($condition){
-			case "Blowing dust":
-	        case "Clear":
-    	    case "Haze":
-				return self::IMAGE_URL.'weather/sun.png'; 
-        	case "Cloudy":
-				return self::IMAGE_URL.'weather/cloudy.png'; 
-	        case "Fog":			
-	        case "Light fog":				
-	        case "Mostly cloudy":				
-	        case "Partly cloudy":
-				return self::IMAGE_URL.'weather/clouds.png'; 
-	        case "Rain":
-	        case "Light rain":
-	        case "Heavy rain":
-	        case "Heavy drizzle":
-	        case "Freezing rain":
-				return self::IMAGE_URL.'weather/rain.png'; 
-	        case "Snow":
-    	    case "Lightself::IMAGE_URL. snow":
-				return 'weather/snow.png'; 
-        	case "Thunderstorms":
-				return self::IMAGE_URL.'weather/lightning.png'; 
-			default:
-				return self::IMAGE_URL.'weather/clear.png'; 
-			}
-	}			
 	
+	
+	private function logApp($version){
+		if(!$this->db_on)
+			return false;
+			
+		$connection = new Connection();
+		if($connection->Connect()){
+			$collection = $connection->getConn()->stats;
+			$collection->update(array('version'=>$version,'day'=>(int)date('Ymd'))
+				,array('$inc'=>array("count"=>1)
+						,'$set'=>array('day'=>(int)date('Ymd')))
+				,array('upsert'=>true,'safe'=>true,'multiple'=>false));	
+			$connection->DisConnect();
+		}
+	}
+	
+	private function logCountry($country_code,$origin){
+		if(!$this->db_on)
+			return false;
+			
+		$field = $origin==1?"origin_count":"count";
+		$connection = new Connection();
+		if($connection->Connect()){
+			$collection = $connection->getConn()->countries;
+			$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
+				,array('$inc'=>array("$field"=>1))
+				,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
+			$connection->DisConnect();
+		}
+	}
+	
+	private function logState($state_abbr,$origin){
+		if(!$this->db_on)
+			return false;
+			
+		$field = $origin==1?"origin_count":"count";
+		$connection = new Connection();
+		if($connection->Connect()){
+			$collection = $connection->getConn()->states;
+			$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
+				,array('$inc'=>array("$field"=>1))
+				,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
+			$connection->DisConnect();
+		}
+	}
+	
+	private function getCountryCode($country){
+		if(!$this->db_on)
+			return false;
+		
+		$connection = new Connection();
+		$results = array();
+		if($connection->Connect()){
+			$collection = $connection->getConn()->countries;
+			$cursor=$collection->find(array('name'=>new MongoRegex('/^'.$country.'$/i')),array('iso'=>1))->limit(1);
+			$results = iterator_to_array($cursor,false);				
+			$connection->DisConnect();
+		}	
+		if(Error::hasError() || empty($results[0]['iso']))
+			return false;
+		else{
+			return true;	
+		}
+	}
+	
+	private function getCountryName($iso){		
+		if(!$this->db_on)
+			return false;
+			
+		$connection = new Connection();
+		$results = array();
+		if($connection->Connect()){
+			$collection = $connection->getConn()->countries;
+			$cursor=$collection->find(array('iso'=>new MongoRegex('/^'.$iso.'$/i')),array('printable_name'=>1))->limit(1);
+			$results = iterator_to_array($cursor,false);				
+			$connection->DisConnect();
+		}	
+		if(Error::hasError() || empty($results[0]['printable_name']))
+			return false;
+		else{
+			return $results[0]['printable_name'];	
+		}
+	}
+	
+	private function isUnitedStates($state){
+		if(!$this->db_on)
+			return false;
+		
+		$connection = new Connection();
+		$results = array();
+		if($connection->Connect()){
+			$collection = $connection->getConn()->states;
+			$cursor=$collection->find(array('abbr'=>new MongoRegex('/^'.$state.'$/i')),array('name'=>1))->limit(1);
+			$results = iterator_to_array($cursor,false);				
+			$connection->DisConnect();
+		}	
+		if(Error::hasError() || empty($results[0]['name']))
+			return false;
+		else{
+			return true;	
+		}
+	}	
 }
 ?>

@@ -6,11 +6,11 @@ This version does not include a database
 
 Get the geoip file and unzip it
 
-wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+	$ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
  
 You can also setup a cron job to pull this monthly
  
-$ crontab -e
+	$ crontab -e
  
 #Sometimes maxmind updates on the 2nd others on the 6th
 0 0 10  * * /var/www/geoip/cron_get_geoip.sh
@@ -20,8 +20,15 @@ Install Pear Libs
 	pear install Net_DNS
 	pear install Net_DNSBL
 	pear install Net_GeoIP
+	pecl install mongo
 
 Edit lib/MailHops.php
 
-	Set IMAGE_URL
 	Set GEOIP_FILE
+	Set IMAGE_URL	(optional)	
+	Set DNS_SERVER	(optional)
+	
+If you want to use a database, I would suggest signing up for mongolab.com
+
+	Set user/pass in lib/Connection.php
+	Set $db_on = true in lib/MailHops.com
