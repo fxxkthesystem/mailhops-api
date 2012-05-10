@@ -202,9 +202,9 @@ class MailHops{
 	
 	private function getHost($ip)
 	{
-		require_once 'Net/DNS.php';
+		require_once 'Net/DNS2.php';
 		
-		$resolver = new Net_DNS_Resolver();
+		$resolver = new Net_DNS2_Resolver();
 		$response = $resolver->query('php.net', 'MX');
 		if ($response) {
 		  foreach ($response->answer as $rr) {

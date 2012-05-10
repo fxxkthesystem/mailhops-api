@@ -17,7 +17,7 @@ You can also setup a cron job to pull this monthly
  
 Install Pear Libs
  
-	pear install Net_DNS
+	pear install Net_DNS2
 	pear install Net_DNSBL
 	pear install Net_GeoIP
 	pecl install mongo
