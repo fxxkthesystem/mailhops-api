@@ -151,7 +151,7 @@ class MailHops{
 				if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
 					$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 			}
-			$hostname=self::getRHost($ip);
+			$hostname=self::getRHost($client_ip);
 			if(!empty($hostname))
 				$route['host']=$hostname;
 			$route['hopnum']=$hopnum;
