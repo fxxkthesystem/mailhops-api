@@ -2,8 +2,6 @@ This is the free version of the MailHops API
 
 By using this you must agree to the terms of use covered in http://www.mailhops.com/terms
  
-This version does not include a database
-
 Get the geoip file and unzip it
 
 	$ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
