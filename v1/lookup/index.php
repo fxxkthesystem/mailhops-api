@@ -1,4 +1,4 @@
-<?php include '../lib/mailhops.api.php';
+<?php include '../lib/load.php';
 
 $maintenance = '';
 $json_map = '';

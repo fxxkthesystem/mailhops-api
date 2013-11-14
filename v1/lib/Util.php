@@ -65,7 +65,7 @@ class Util {
 	    return $ip;
 	}
 	
-	public function getVersion($version){
+	public static function getVersion($version){
 	
 		$version = end(explode(' ',$version));
 		return str_replace('.','',$version);		

@@ -57,7 +57,7 @@ class Connection
 		$error='';
 		try
 		{
-			$link = new Mongo("mongodb://".$this->user.":".$this->pass."@".$this->host.'/'.$this->db);
+			$link = new MongoClient("mongodb://".$this->user.":".$this->pass."@".$this->host.'/'.$this->db);
 			
 			if(!empty($link)){
 				$this->link=$link;
@@ -77,11 +77,5 @@ class Connection
 		}
 		
 		return false;		
-	}
-	
-	public function DisConnect()
-	{
-		//don't need to close, mongo php driver will do this with connection pooling
-		//$this->link->close();		
-	}
+	}	
 }

@@ -2,8 +2,6 @@ This is the free version of the MailHops API
 
 By using this you must agree to the terms of use covered in http://www.mailhops.com/terms
  
-This version does not include a database
-
 Get the geoip file and unzip it
 
 	$ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
@@ -13,7 +11,7 @@ You can also setup a cron job to pull this monthly
 	$ crontab -e
  
 #Sometimes maxmind updates on the 2nd others on the 6th
-0 0 10  * * /var/www/geoip/cron_get_geoip.sh
+0 0 10  * * /path/to/v1/cron_get_geoip.sh
  
 Install Pear Libs
  
@@ -31,4 +29,4 @@ Edit lib/MailHops.php
 If you want to use a database, I would suggest signing up for mongolab.com
 
 	Set user/pass in lib/Connection.php
-	Set $db_on = true in lib/MailHops.com
+	Set $db_on = true in lib/MailHops.php

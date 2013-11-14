@@ -1,4 +1,4 @@
-<?php include '../lib/mailhops.api.php';
+<?php include '../lib/load.php';
 $mailhops = new MailHops();
 $mailhops->setReverseHost(true);
 
@@ -49,9 +49,9 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
     <? } ?>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<? if($map_type=='bing'){?>
-		<script type="text/javascript" src="//api.mailhops.com/v1/map/bing.min.js?v=1"></script>
+		<script type="text/javascript" src="/v1/map/bing.min.js?v=1"></script>
 	<? } else {?>
-		<script type="text/javascript" src="//api.mailhops.com/v1/map/goog.min.js?v=1"></script>
+		<script type="text/javascript" src="/v1/map/goog.min.js?v=1"></script>
 	<? } ?>
 	<script>
 	jQuery(document).ready(function($) {

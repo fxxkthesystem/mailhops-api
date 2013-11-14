@@ -432,7 +432,7 @@ class MailHops{
 				,array('$inc'=>array("count"=>1)
 						,'$set'=>array('day'=>(int)date('Ymd')))
 				,array('upsert'=>true,'safe'=>true,'multiple'=>false));	
-			$connection->DisConnect();
+			
 		}
 	}
 	
@@ -447,7 +447,7 @@ class MailHops{
 			$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
 				,array('$inc'=>array("$field"=>1))
 				,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
-			$connection->DisConnect();
+			
 		}
 	}
 	
@@ -462,7 +462,7 @@ class MailHops{
 			$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
 				,array('$inc'=>array("$field"=>1))
 				,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
-			$connection->DisConnect();
+			
 		}
 	}
 	
@@ -476,7 +476,7 @@ class MailHops{
 			$collection = $connection->getConn()->countries;
 			$cursor=$collection->find(array('name'=>new MongoRegex('/^'.$country.'$/i')),array('iso'=>1))->limit(1);
 			$results = iterator_to_array($cursor,false);				
-			$connection->DisConnect();
+			
 		}	
 		if(Error::hasError() || empty($results[0]['iso']))
 			return false;
@@ -495,7 +495,7 @@ class MailHops{
 			$collection = $connection->getConn()->countries;
 			$cursor=$collection->find(array('iso'=>new MongoRegex('/^'.$iso.'$/i')),array('printable_name'=>1))->limit(1);
 			$results = iterator_to_array($cursor,false);				
-			$connection->DisConnect();
+			
 		}	
 		if(Error::hasError() || empty($results[0]['printable_name']))
 			return false;
@@ -514,7 +514,7 @@ class MailHops{
 			$collection = $connection->getConn()->states;
 			$cursor=$collection->find(array('abbr'=>new MongoRegex('/^'.$state.'$/i')),array('name'=>1))->limit(1);
 			$results = iterator_to_array($cursor,false);				
-			$connection->DisConnect();
+			
 		}	
 		if(Error::hasError() || empty($results[0]['name']))
 			return false;
