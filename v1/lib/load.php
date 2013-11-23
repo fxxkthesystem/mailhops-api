@@ -7,6 +7,15 @@
  * 
  * 
  */
+//Strict errors will break stuff
+ini_set('display_errors',0); 
+//log them if you want
+error_reporting(E_ALL & ~E_NOTICE | E_STRICT);
+
+//also some shared hosts providers you may need to include the pear path
+//$path = '/home/[username]/pear/php';
+//set_include_path(get_include_path() . PATH_SEPARATOR . $path);
+
 function __autoload($name){
 	$filename = realpath(sprintf("%s/%s.php", dirname(__FILE__), $name));
 	
