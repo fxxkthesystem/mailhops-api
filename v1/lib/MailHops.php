@@ -5,6 +5,13 @@
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
  * @version	1.0
  */
+
+date_default_timezone_set('America/Denver');
+
+use GeoIp2\Database\Reader;
+
+require_once 'Net/DNSBL.php';
+
 class MailHops{
 
 	private $ips;
@@ -23,17 +30,24 @@ class MailHops{
 	
 	private $db_on				= false;
 	
+	private $gi 				= null;
+
+	private $gi6 				= null;
+
+	private $dnsbl 				= null;
+
+	private $w3w				= null;
+
+	private $language 			= 'en';
+
 	const IMAGE_URL 			= 'http://api.mailhops.com/v1/images/';
 	
 	//path from DOCUMENT_ROOT
 	const IMAGE_DIR 			= '/v1/images/';
 	
-	//Path to GeoIP dat file
-	const GEOIP_FILE 			= '/var/www/geoip/GeoLiteCity.dat';
-	
-	//Google DNS server
-	const DNS_SERVER 			= '8.8.8.8';
-		
+	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
+	const DNS_SERVER 			= '208.67.222.222';
+
 	public function __construct(){
 
 		if(!empty($_GET['route']))
@@ -41,6 +55,9 @@ class MailHops{
 		else if(!empty($_GET['r']))
 			$this->ips = explode(',',$_GET['r']);
 		
+		if(!empty($_GET['l']) && in_array($_GET['l'], array('de','en','es','fr','ja','pt-BR','ru','zh-CN') ))
+			$this->language = $_GET['l'];
+
 		$this->total_miles=0;
 		$this->total_kilometers=0;
 		
@@ -59,7 +76,16 @@ class MailHops{
 		if(!empty($app_version)){
 			self::logApp($app_version);
 		}
-		
+
+		//setup geoip
+		if(file_exists(__DIR__."/../../geoip/GeoLite2-City.mmdb"))
+			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
+
+		//setup dnsbl
+		$this->dnsbl = new Net_DNSBL();
+		$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
+
+		$this->w3w = new What3Words(array('lang'=>$this->language));
 	}
 	
 	public function setReverseHost($show){
@@ -94,7 +120,7 @@ class MailHops{
 		foreach($this->ips as $ip){
 
 			if(!self::isPrivate($ip)){
-			
+
 				$route = self::getLocation($ip,$hopnum);
 				
 				$hostname=self::getRHost($ip);
@@ -120,9 +146,9 @@ class MailHops{
 					}
 				} 
 				$origin++;
+			} else {
+				$route = array('ip'=>$ip,'private'=>true,'local'=>true);				
 			}
-			else
-				$route = array('ip'=>$ip,'private'=>true,'local'=>true);
 				
 			$route['hopnum']=$hopnum;
 			$route['image']=self::IMAGE_URL;
@@ -141,25 +167,28 @@ class MailHops{
 	if($show_client==true && !empty($client_ip)){
 
 		$route=array();
-		if(!empty($client_ip)){
+		if(!empty($client_ip) && !self::isPrivate($client_ip)){
 			$route = self::getLocation($client_ip,$hopnum);
-		}
-		if(!empty($route)){
-			if(!empty($route['countryCode'])){
-				if(empty($route['countryName']))
-					$route['countryName']=self::getCountryName($route['countryCode']);
-				if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
-					$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
+
+			if(!empty($route)){
+				if(!empty($route['countryCode'])){
+					if(empty($route['countryName']))
+						$route['countryName']=self::getCountryName($route['countryCode']);
+					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
+						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
+				}
+				$hostname=self::getRHost($client_ip);
+				if(!empty($hostname))
+					$route['host']=$hostname;
+				$route['hopnum']=$hopnum;
+				$route['image']=self::IMAGE_URL.'email_end.png';				
+				$route['client']=true;
+				//$route['dnsbl']=self::getDNSBL($ip);
+				$mail_route[]=$route;
 			}
-			$hostname=self::getRHost($client_ip);
-			if(!empty($hostname))
-				$route['host']=$hostname;
-			$route['hopnum']=$hopnum;
-			$route['image']=self::IMAGE_URL.'email_end.png';				
-			$route['client']=true;
-			//$route['dnsbl']=self::getDNSBL($ip);
-			$mail_route[]=$route;
-		}
+		} else if(self::isPrivate($client_ip)) {
+			$mail_route[]=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
+		}		
 	}
 	//track end time
 	$time = microtime();
@@ -200,40 +229,25 @@ class MailHops{
 	    return $ip;
 	}
 	
-	private function getHost($ip)
-	{
-		require_once 'Net/DNS2.php';
-		
-		$resolver = new Net_DNS2_Resolver();
-		$response = $resolver->query('php.net', 'MX');
-		if ($response) {
-		  foreach ($response->answer as $rr) {
-		    $rr->display();
-		  }
-		  if (count($response->additional)) {
-		    foreach ($response->additional as $rr) {
-		      $rr->display();
-		    }
-		  }
-		}
-	}
-	
+	// TODO support IPV6
 	private function getDNSBL($ip)
 	{
-		require_once 'Net/DNSBL.php';
-		
-		$dnsbl = new Net_DNSBL();
-		$dnsbl->setBlacklists(array('zen.spamhaus.org'));
-		if($dnsbl->isListed($ip,false)){
-			$results = $dnsbl->getDetails($ip);
-			if(substr($results['record'],0,7)=='127.0.0')
-				return array('listed'=>true,'record'=>$results['record']);
-			else
-				return array('listed'=>false);
-				
+		$return = array('listed'=>false);
+
+		if(self::isIPV6($ip))
+			return $return;		
+
+		try{
+			if($this->dnsbl->isListed($ip,false)){
+				$results = $this->dnsbl->getDetails($ip);
+				if(isset($results) && substr($results['record'],0,7)=='127.0.0')
+					$return = array('listed'=>true,'record'=>$results['record']);
+			}	
+		} catch(Exception $ex){
+
 		}
 		
-		return array('listed'=>false);
+		return $return;
 	}
 	
 	private function getDNSBL_IP(){
@@ -250,7 +264,12 @@ class MailHops{
 	{
 		if(isset($this) && !$this->reverse_host)
 			return '';
-		$output = exec('host '.$ip.' '.self::DNS_SERVER);
+		
+		if(self::isIPV6($ip))
+			$output = exec('host -6 '.$ip.' '.self::DNS_SERVER);
+		else
+			$output = exec('host -4 '.$ip.' '.self::DNS_SERVER);
+
 		if(!empty($output) && strstr($output,'name pointer')){
 			//parse host
 			$host = substr($output,strpos($output,'name pointer')+13);
@@ -273,7 +292,8 @@ class MailHops{
 	*/
 	public function getWhoIs($ip,$format=true)
 	{
-		$return=array();
+		$return = array();
+
 		exec('whois -h whois.arin.net n '.$ip, $output);
 		if(!empty($output)){
 			for($i=0;$i<count($output);$i++){
@@ -313,27 +333,43 @@ class MailHops{
 		
 		return $loc_array;		
 	}
+
+	private function getLanguageValue($field){
+		if(isset($field[$this->language]))
+			return $field[$this->language];
+		else if(isset($field['en']))
+			return $field['en'];
+		return '';
+	}
 	
 	private function getLocationMaxMind($ip,$hopnum)
 	{
-		require_once 'Net/GeoIP.php';
-		
 		$loc = '';
 		$loc_array=array('ip'=>"$ip");
-		if(!empty($ip) && file_exists(self::GEOIP_FILE))
-		{
+
+		if(!$this->gi || self::isPrivate($ip))
+			return $loc_array;
+
+		if(!empty($ip) && $this->gi)
+		{		
+			$location = $this->gi->city($ip);
 			try{
-				$geoip = Net_GeoIP::getInstance(self::GEOIP_FILE, Net_GeoIP::STANDARD);
-				$location = $geoip->lookupLocation($ip);
-				if(!empty($location->countryCode)){
+				if(!empty($location)){
+					
 					$loc_array=array('ip'=>"$ip"
-									,'lat'=>$location->latitude
-									,'lng'=>$location->longitude
-									,'city'=>utf8_encode($location->city)
-									,'state'=>!self::displayState($location->region)&&!empty($location->countryName)?utf8_encode($location->countryName):utf8_encode($location->region)
-									,'countryName'=>utf8_encode($location->countryName)
-									,'countryCode'=>$location->countryCode
+									,'lat'=>$location->location->latitude
+									,'lng'=>$location->location->longitude
+									,'city'=>self::getLanguageValue($location->city->names)
+									,'state'=>(!self::displayState($location->mostSpecificSubdivision->isoCode) && self::getLanguageValue($location->country->names) !='')
+										?utf8_encode(self::getLanguageValue($location->country->names))
+										:utf8_encode($location->mostSpecificSubdivision->isoCode)//shouldn't do display logic here but...
+									,'zip'=>!empty($location->postal->code)?$location->postal->code:''
+									,'countryName'=>self::getLanguageValue($location->country->names)
+									,'countryCode'=>!empty($location->country->isoCode)?$location->country->isoCode:''
+									,'w3w'=>(!empty($this->w3w))?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
 								);
+
+
 					if(!empty($this->last_location)){
 						if($this->last_location['city']!=$loc_array['city']){
 							$distance = self::getDistance($this->last_location,$loc_array);
@@ -368,36 +404,16 @@ class MailHops{
 		}
 		return true;
 	}
-		
+	
+	public function isIPV6($ip){
+		if(strstr($ip, ":"))
+			return true;
+		return false;
+	}
+
 	public function isPrivate($ip){
 		
-		if(substr($ip,0,3)=='10.' //Class A
-			|| substr($ip,0,7)=='172.16.' //Class B
-			|| substr($ip,0,7)=='172.17.' //Class B
-			|| substr($ip,0,7)=='172.18.' //Class B
-			|| substr($ip,0,7)=='172.19.' //Class B
-			|| substr($ip,0,7)=='172.20.' //Class B
-			|| substr($ip,0,7)=='172.21.' //Class B
-			|| substr($ip,0,7)=='172.22.' //Class B
-			|| substr($ip,0,7)=='172.23.' //Class B
-			|| substr($ip,0,7)=='172.24.' //Class B
-			|| substr($ip,0,7)=='172.25.' //Class B
-			|| substr($ip,0,7)=='172.26.' //Class B
-			|| substr($ip,0,7)=='172.27.' //Class B
-			|| substr($ip,0,7)=='172.28.' //Class B
-			|| substr($ip,0,7)=='172.29.' //Class B
-			|| substr($ip,0,7)=='172.30.' //Class B
-			|| substr($ip,0,7)=='172.31.' //Class B
-			|| substr($ip,0,8)=='192.168.' //Class C
-			|| substr($ip,0,8)=='169.254.' //Class M$
-			|| substr($ip,0,4)=='127.' //Localhost
-			|| substr($ip,0,4)=='255.'//BCast
-			|| substr($ip,0,2)=='0.') //Whoops
-		{
-		return true;
-		} else {
-		return false;
-		}
+		return preg_match('/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/',$ip);
 	}	
 	
 	private function getDistance($from, $to, $unit='k') {

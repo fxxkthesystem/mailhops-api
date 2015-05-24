@@ -1,3 +1,3 @@
 <?php
-echo 'MailHops API is Up';
+	echo 'MailHops API is Up';
 ?>

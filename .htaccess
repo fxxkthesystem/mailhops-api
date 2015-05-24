@@ -1,0 +1,5 @@
+#do not allow access to these files
+RewriteRule ^config.json - [R=404,L,NC]
+RewriteRule ^composer.lock - [R=404,L,NC]
+RewriteRule ^composer.json - [R=404,L,NC]
+RewriteRule ^.gitignore - [R=404,L,NC]

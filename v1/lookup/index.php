@@ -1,4 +1,8 @@
-<?php include '../lib/load.php';
+<?php
+
+if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
+    die('Project dependencies missing');
+}
 
 $maintenance = '';
 $json_map = '';
@@ -44,12 +48,11 @@ if(!empty($maintenance)){
 	}
 }
 
+header("Access-Control-Allow-Origin: *");
 header('Content-type: application/json');
 	
 if(isset($_GET['callback']))
 	echo $_GET['callback'] . ' (' . $json_map . ');';	
-else if(isset($_GET['tb']) || isset($_GET['pb']))
-	echo $json_map;
-else
-	echo ' (' . $json_map . ')';	
+else 
+	echo $json_map;	
 ?>
