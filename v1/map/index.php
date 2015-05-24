@@ -35,8 +35,8 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
 
 	<script> 
 		var mailRoute = <?=$mailhops->getRoute()?>
-			, map_unit = '<?=$map_unit?>'
-			, map_provider = '<?=$map_provider?>';
+			, mapUnit = '<?=$map_unit?>'
+			, mapProvider = '<?=$map_provider?>';
 	</script>	
 	<script src="/node_modules/angular/angular.min.js"></script>
 </head>
@@ -50,8 +50,23 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
         <div>
 	      	<ul class="nav navbar-nav">
 	        	<li class="active"><a>This message traveled {{distance}}</a></li>
+            <li role="presentation" class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                Templates <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" role="menu">
+                <li ng-repeat="t in templates track by $index">
+                  <a ng-click="changeTemplate(t.name)">{{t.name}} <i class="fa fa-check fa-lg" ng-show="map_provider==t.name"></i></a>
+                </li>
+              </ul>
+            </li>
 	        </ul>
-    	</div>          
+    	   </div>          
+          <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://twitter.com/intent/tweet?text=This email traveled {{distance}}. <?='http://api.mailhops.com'.$_SERVER['REQUEST_URI']?> @MailHops"><i class="fa fa-lg fa-twitter"></i></a></li>
+          </ul>          
+        </div>
       </div>
     </nav>
 
@@ -62,8 +77,8 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
           	<li class="active head">
           		<a>{{route.length}} hops</a>
           	</li>
-          	<li ng-repeat="r in route"><a ng-click="showMarker(r.hopnum)">
-          			{{r.hopnum}} <img src="/images/mailhops-logo.svg" width="20">
+          	<li class="hop" ng-repeat="r in route track by $index" ng-class="{'active':r.focus}"><a ng-click="showMarker(r.hopnum)">
+          			<strong>{{r.hopnum}}</strong> <img src="/images/hop.svg" width="20">
           			<div ng-if="r.private">
           				<span>{{r.ip}}</span>
           			</div>
@@ -80,34 +95,19 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
-          	<leaflet width="100%" height="400px" markers="markers"></leaflet>
+          	<leaflet width="100%" height="400px" center="boulder" markers="markers"></leaflet>
           </div>
   	 </div>
   	</div>
   </div>
-	
-	<? if($map_type=='bing'){?>
-	<div id="infoBox">
-        <div id="infoboxText">
-            <b id="infoboxTitle"></b>
-            <img id="infoboxClose" src="close.gif" alt="close" onclick="closeInfoBox()"/>
-            <a id="infoboxDescription"></a>
-        </div>
-      </div>
-    <? } ?>
 
+  <script type="text/javascript" async src="//platform.twitter.com/widgets.js"></script>   
 	<script src="/node_modules/jquery/dist/jquery.min.js"></script>
 	<script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="/node_modules/leaflet/dist/leaflet.js"></script>
 	<script src="/node_modules/leaflet-providers/leaflet-providers.js"></script>
 	<script src="/node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
 	<script src="js/L.Geodesic.js"></script>
-	<script src="js/app.js"></script>
-	<script type="text/javascript">
-	   $(document).on('click', '.nav-sidebar li', function() {
-	       $(".nav-sidebar li").removeClass("active");
-	       $(this).addClass("active");
-	   });
-	</script>
+	<script src="js/app.js"></script>	
 </body>
 </html>

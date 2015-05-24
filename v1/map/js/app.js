@@ -1,6 +1,14 @@
 var mailHops = angular.module('mailHops',['leaflet-directive'])
 .controller('mainController', ['$scope', 'leafletData', function($scope,leafletData) {
         
+        $scope.route = mailRoute.response.route;
+        $scope.map_unit = mapUnit;
+        $scope.map_provider = mapProvider;
+
+        $scope.markers = [];     
+        $scope.templates = [];   
+        $scope.distance = '';
+
         function addCommas(nStr)
         {
             nStr += '';
@@ -16,42 +24,57 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
 
         var hopLines = [];
         var prevHopFocused;
+        var hopIcon = L.icon({
+                iconUrl: '/images/hop.svg',
+                iconSize: [20, 20],
+                iconAnchor: [5, 5],
+                popupAnchor: [5, -5]
+        });        
+        
+        angular.forEach(L.TileLayer.Provider.providers, function(k,v){
+            if(k.variants){
+                angular.forEach(k.variants,function(key,variant){
+                    $scope.templates.push({name:v+'.'+variant});                    
+                })
+            } else {
+                $scope.templates.push({'name':v});                
+            }
+        });
 
-        $scope.markers = [];        
-        $scope.route = mailRoute.response.route;
-        $scope.distance = '';
-
-        if(map_unit=='k')
+        if($scope.map_unit=='k')
             $scope.distance = addCommas(Math.round(mailRoute.response.distance.kilometers))+' ki';            
         else
             $scope.distance = addCommas(Math.round(mailRoute.response.distance.miles))+' mi';
 
         angular.forEach($scope.route, function(r) {
             if(r.lat){
+                r.focus = false;
                 var message = '#'+r.hopnum+' ';
-                message += (r.city !='')?r.city+', '+r.state:r.countryName;                
+                message += (r.city !='')?r.city+', '+r.state:r.countryName;
                 //add hop to the markers
-                $scope.markers[r.hopnum] = {
-                    lat: r.lat,
-                    lng: r.lng,
-                    message: message
-                };
+                $scope.markers[r.hopnum] = { lat: r.lat
+                                            , lng: r.lng
+                                            , message: message
+                                            , icon: hopIcon
+                                            , hopnum: r.hopnum
+                                            , focus: false
+                                        };
                 //add hop to the polyline
                 hopLines.push([r.lat,r.lng]);
             }
         });
                 
         angular.extend($scope, {
-                london: {
-                    lat: 51.505,
-                    lng: -0.09,
+                boulder: {
+                    lat: 40.0274,
+                    lng: -105.2519,
                     zoom: 8
                 },
                 markers: $scope.markers
             });
 
         leafletData.getMap('map').then(function(map) {
-            L.tileLayer.provider(map_provider).addTo(map);
+            L.tileLayer.provider($scope.map_provider).addTo(map);
 
             if(hopLines.length>0){
                 var polyline = L.geodesicPolyline(hopLines, {color: '#428bca'}).addTo(map);
@@ -59,13 +82,27 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
             }
         });
 
+        $scope.changeTemplate = function(template){
+            $scope.map_provider = template;
+            leafletData.getMap('map').then(function(map) {
+                L.tileLayer.provider($scope.map_provider).addTo(map);
+            });
+        };        
+
         $scope.showMarker = function(hopnum){
-            if(prevHopFocused)
+            if(prevHopFocused){
                 $scope.markers[prevHopFocused].focus = false;                
+                $scope.route[prevHopFocused].focus = false;                
+            }
 
             if($scope.markers[hopnum]){
                 $scope.markers[hopnum].focus = true;
+                $scope.route[hopnum].focus = true;
                 prevHopFocused = hopnum;                
             }
         };
+
+        $scope.$on('leafletDirectiveMarker.click', function (e, a){
+            $scope.showMarker(a.model.hopnum);            
+          });
 }]);

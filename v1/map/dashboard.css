@@ -21,6 +21,12 @@ body {
 .fa-bomb {
   color: #222;  
 }
+
+.fa-check {
+  color: #428bca;
+  display: none;
+}
+
 .nav-sidebar.hops>li {
   border-bottom: 1px solid #ccc;
 }
@@ -84,7 +90,7 @@ body {
   font-size: 20px;
   text-align: center;
   color: #fff;
-  background-color: #0f497a;  
+  background-color: #75ab3b;  
 }
 
 /*
