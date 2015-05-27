@@ -32,7 +32,7 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
 	<link rel="stylesheet" href="dashboard.css">	
 	<link rel="stylesheet" href="/node_modules/leaflet/dist/leaflet.css">
 	<link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
-
+  
 	<script> 
 		var mailRoute = <?=$mailhops->getRoute()?>
 			, mapUnit = '<?=$map_unit?>'
@@ -54,9 +54,9 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
               <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
                 Templates <span class="caret"></span>
               </a>
-              <ul class="dropdown-menu" role="menu">
+              <ul class="dropdown-menu scrollable-menu" role="menu">
                 <li ng-repeat="t in templates track by $index">
-                  <a ng-click="changeTemplate(t.name)">{{t.name}} <i class="fa fa-check fa-lg" ng-show="map_provider==t.name"></i></a>
+                  <a ng-click="changeTemplate(t.name)" ng-class="{'active':map_provider==t.name}">{{t.name}}</a>
                 </li>
               </ul>
             </li>
@@ -72,30 +72,33 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
 
     <div class="container-fluid">
       <div class="row">
-        <div id="route" class="col-sm-3 col-md-2 sidebar">
+        <div id="route" class="col-sm-4 col-md-3 sidebar">
           <ul class="nav nav-sidebar hops">  
           	<li class="active head">
           		<a>{{route.length}} hops</a>
           	</li>
-          	<li class="hop" ng-repeat="r in route track by $index" ng-class="{'active':r.focus}"><a ng-click="showMarker(r.hopnum)">
-          			<strong>{{r.hopnum}}</strong> <img src="/images/hop.svg" width="20">
+          	<li class="hop" ng-repeat="r in route track by $index" ng-class="{'active':r.focus}" ng-click="showMarker(r.hopnum)">
+          			<div class="btn btn-circle"><strong>{{r.hopnum}}</strong></div>
           			<div ng-if="r.private">
-          				<span>{{r.ip}}</span>
+          				<span>Private<br/></span>
+                  <span>{{r.ip}}</span>
+                  <br/>
           			</div>
           			<div ng-if="!r.private">
-          				<span>{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i></span>
-          				<span ng-if="r.countryName"><br/><img ng-src="{{r.flag}}"/> {{r.countryName}} ({{r.countryCode}})</span>
-          				<span ng-if="r.city"><br/>{{r.city}}, {{r.state}}</span>
-          				<span ng-if="r.host"><br/>{{r.host}}</span>
-          				<span ng-if="r.w3w"><br/>{{r.w3w.words.join('.')}}</span>
+                  <span ng-if="r.countryName"><img ng-src="{{r.flag}}"/> {{r.countryName}} ({{r.countryCode}})<br/></span>
+                  <span ng-if="r.city">{{r.city}}, {{r.state}}<br/></span>
+
+          				<span>{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
+          				<span ng-if="r.host" class="host">{{r.host}}<br/></span>
+          				<span ng-if="r.w3w" class="words">{{r.w3w.words.join('.')}}</span>
           			</div>
-          		</a>
+
           	</li>          
           </ul>
       </div>
-      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <div class="row placeholders">
-          	<leaflet width="100%" height="400px" center="boulder" markers="markers"></leaflet>
+      <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+          <div class="row ">
+          	<leaflet center="boulder" markers="markers" width="100%" height="665px"></leaflet>
           </div>
   	 </div>
   	</div>

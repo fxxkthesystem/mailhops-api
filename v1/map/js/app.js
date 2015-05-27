@@ -24,13 +24,16 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
 
         var hopLines = [];
         var prevHopFocused;
-        var hopIcon = L.icon({
-                iconUrl: '/images/hop.svg',
-                iconSize: [20, 20],
-                iconAnchor: [5, 5],
-                popupAnchor: [5, -5]
-        });        
-        
+        var local_icons = { div_icon: {
+            iconUrl: '/images/hop.svg',
+            iconSize: [35, 35],
+            popupAnchor:  [0, 0]
+        } };
+
+        angular.extend($scope, {
+            icons: local_icons
+        });
+
         angular.forEach(L.TileLayer.Provider.providers, function(k,v){
             if(k.variants){
                 angular.forEach(k.variants,function(key,variant){
@@ -49,13 +52,14 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
         angular.forEach($scope.route, function(r) {
             if(r.lat){
                 r.focus = false;
-                var message = '#'+r.hopnum+' ';
+                var message = '<strong>#'+r.hopnum+'</strong> ';
                 message += (r.city !='')?r.city+', '+r.state:r.countryName;
                 //add hop to the markers
+                
                 $scope.markers[r.hopnum] = { lat: r.lat
                                             , lng: r.lng
                                             , message: message
-                                            , icon: hopIcon
+                                            , icon: local_icons.div_icon
                                             , hopnum: r.hopnum
                                             , focus: false
                                         };
@@ -91,15 +95,20 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
 
         $scope.showMarker = function(hopnum){
             if(prevHopFocused){
-                $scope.markers[prevHopFocused].focus = false;                
-                $scope.route[prevHopFocused].focus = false;                
+                $scope.markers[prevHopFocused].focus = false;                                
             }
 
             if($scope.markers[hopnum]){
                 $scope.markers[hopnum].focus = true;
-                $scope.route[hopnum].focus = true;
                 prevHopFocused = hopnum;                
             }
+            //route does not have index
+            angular.forEach($scope.route,function(r){
+                if(r.hopnum==hopnum)
+                    r.focus = true;
+                else
+                    r.focus = false;
+            });
         };
 
         $scope.$on('leafletDirectiveMarker.click', function (e, a){

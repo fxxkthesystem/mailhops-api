@@ -5,9 +5,8 @@
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
+  height: 100%;
 }
-
-.angular-google-map-container { height: 100% }
 
 /*
  * Global add-ons
@@ -42,6 +41,53 @@ body {
   color: #ccc;
   top: -6px;
   position: relative;
+}
+
+.scrollable-menu {
+    height: auto;
+    max-height: 300px;
+    overflow-x: hidden;
+}
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.42;
+  border-radius: 15px;
+  float: right;
+  color: #fff;
+  background-color: #75ab3b;
+}
+ 
+.dropdown-menu .active {
+  color: #fff;
+  background-color: #75ab3b;
+}
+
+.hop {
+  color:#222;
+  padding: 20px;
+  word-wrap: break-word;
+}
+
+.hop .host {
+  color: #337ab7;
+}
+
+.hop .words {
+  color: #e6323e;
+ }
+
+.hop.active{
+  color: #fff;
+  background-color: #428bca;  
+}
+
+.hop.active .host, .hop.active .words {
+  color: #222;
 }
 
 /*
@@ -99,24 +145,4 @@ body {
 
 .main .page-header {
   margin-top: 0;
-}
-
-
-/*
- * Placeholder dashboard ideas
- */
-
-.placeholders {
-  margin-bottom: 30px;
-  text-align: center;
-}
-.placeholders h4 {
-  margin-bottom: 0;
-}
-.placeholder {
-  margin-bottom: 20px;
-}
-.placeholder img {
-  display: inline-block;
-  border-radius: 50%;
 }

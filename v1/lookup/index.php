@@ -13,7 +13,7 @@ if(!empty($maintenance)){
 					'code'=>410
 					,'host'=>$_SERVER['SERVER_NAME']),
 				'error'=>array('message'=>$maintenance)));
-} else if(isset($_GET['watchmouse'])){
+} else if(isset($_GET['watchmouse']) || isset($_GET['healthcheck'])){
 	$json_map = json_encode(array(
 				'meta'=>array(
 					'code'=>200

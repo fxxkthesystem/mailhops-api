@@ -157,7 +157,7 @@ class MailHops{
 			if(!empty($route['dnsbl']) && $route['dnsbl']['listed']==true && file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'auth/bomb.png'))
 				$route['image'] = self::IMAGE_URL.'auth/bomb.png';
 			
-			$mail_route[$hopnum]=$route;
+			$mail_route[]=$route;
 				
 			$hopnum++;	
 		}
@@ -184,10 +184,10 @@ class MailHops{
 				$route['image']=self::IMAGE_URL.'email_end.png';				
 				$route['client']=true;
 				//$route['dnsbl']=self::getDNSBL($ip);
-				$mail_route[$hopnum]=$route;
+				$mail_route[]=$route;
 			}
 		} else if(self::isPrivate($client_ip)) {
-			$mail_route[$hopnum]=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
+			$mail_route[]=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
 		}		
 	}
 	//track end time
