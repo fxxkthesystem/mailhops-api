@@ -1,6 +1,6 @@
 # MailHops
 
-<img src="http://www.mailhops.com/images/logos/mailhops395.png" width="295" alt="MailHops logo" title="MailHops" align="right" />
+<img src="http://www.mailhops.com/images/logos/mailhops395.png" width="200" alt="MailHops logo" title="MailHops" align="right" />
 
 MailHops is an email route API. It does two things:
 
