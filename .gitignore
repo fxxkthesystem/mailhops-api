@@ -3,3 +3,4 @@ vendor/*
 node_modules
 config.json
 *.log
+composer.lock
