@@ -7,9 +7,6 @@ if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
 $mailhops = new MailHops();
 $mailhops->setReverseHost(true);
 
-$map_type=isset($_GET['map'])?$_GET['map']:'goog';
-$map_type=isset($_GET['m'])?$_GET['m']:$map_type;
-
 $map_unit=isset($_GET['unit'])?$_GET['unit']:'mi';
 $map_unit=isset($_GET['u'])?$_GET['u']:$map_unit;
 
