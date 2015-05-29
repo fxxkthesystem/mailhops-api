@@ -41,6 +41,7 @@ body {
   color: #ccc;
   top: -6px;
   position: relative;
+  text-decoration: none;
 }
 
 .scrollable-menu {

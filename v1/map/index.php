@@ -1,17 +1,13 @@
 <?php 
-
 if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
     die('Project dependencies missing');
 }
 
-$map_unit=isset($_GET['unit'])?$_GET['unit']:'mi';
-$map_unit=isset($_GET['u'])?$_GET['u']:$map_unit;
-
-$fkey=isset($_GET['fkey'])?$_GET['fkey']:'';
-
-$mailhops = new MailHops(array('unit'=>$map_unit,'forecast_api_key'=>$fkey));
+$mailhops = new MailHops();
 $mailhops->setReverseHost(true);
 
+$map_unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','ki')))?$_GET['u']:'mi';
+$fkey     = !empty($_GET['fkey'])?$_GET['fkey']:'';
 $map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
 
 ?>
@@ -29,7 +25,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
   <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="/bower_components/weather-icons/css/weather-icons.min.css">
 	<link rel="stylesheet" href="dashboard.css">
-  <script type="text/javascript" async src="//platform.twitter.com/widgets.js"></script>
+  
 	<script> 
 		var mailRoute = <?=$mailhops->getRoute()?>
 			, mapUnit = '<?=$map_unit?>'
@@ -99,7 +95,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
                   <span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}<br/></span>
 
           				<span class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip,'whois')">{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
-          				<span ng-if="r.host" class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip,'whois')">{{r.host}}<br/></span>
+          				<span ng-if="r.host" class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip+'?from=app','whois')">{{r.host}}<br/></span>
           				<span ng-if="r.w3w" class="words" ng-click="open('',r.w3w.url,'what3words')">{{r.w3w.words.join('.')}}</span>
           			</div>
 

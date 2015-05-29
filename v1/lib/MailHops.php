@@ -40,6 +40,8 @@ class MailHops{
 
 	private $language 			= 'en';
 
+	private $unit 				= 'mi';
+
 	const IMAGE_URL 			= 'http://api.mailhops.com/v1/images/';
 	
 	//path from DOCUMENT_ROOT
@@ -48,8 +50,10 @@ class MailHops{
 	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
 	const DNS_SERVER 			= '208.67.222.222';
 
-	public function __construct($args=array()){
+	public function __construct(){
 
+		$this->unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','ki')))?$_GET['u']:'mi';
+		
 		if(!empty($_GET['route']))
 			$this->ips = explode(',',$_GET['route']);
 		else if(!empty($_GET['r']))
@@ -87,7 +91,7 @@ class MailHops{
 
 		$this->w3w = new What3Words(array('lang'=>$this->language));
 
-		$this->forecast = new ForecastIO($args);
+		$this->forecast = new ForecastIO(array('api_key'=>!empty($_GET['fkey'])?$_GET['fkey']:'','unit'=>$this->unit));
 	}
 	
 	public function setReverseHost($show){

@@ -8,11 +8,18 @@ class ForecastIO {
 	private $api_key		= '';
 
 	private $client			= null;
+
+	private $units			= 'us';//us or uk
 	
 	public function __construct($args=array()){		
 		
-		if(!empty($args['forecast_api_key'])){
-			$this->api_key = $args['forecast_api_key'];			
+		if(!empty($args['unit']) && $args['unit']=='ki'){
+			$this->units = 'uk';
+		}
+
+		//get key
+		if(!empty($args['api_key'])){
+			$this->api_key = $args['api_key'];			
 		} 
 		else if(file_exists(__DIR__.'/../../config.json')){
 			//read config file
@@ -22,11 +29,12 @@ class ForecastIO {
 			//get w3w api key
 			if(!empty($config_json->forecastio->api_key))
 				$this->api_key = $config_json->forecastio->api_key;
-			
+		} 
+
+		if(!empty($this->api_key)) {
 			//setup caching
 			$this->client = new Client();
 			CacheSubscriber::attach($this->client);
-
 		} else {
 			error_log('Missing config.json file.');
 			return null;
@@ -34,10 +42,11 @@ class ForecastIO {
 	}
 
 	public function getForecast($lat,$lng){
+		//if no api key return empty string
 		if(empty($this->api_key))
 			return '';
 
-		$res = $this->client->get('https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng);
+		$res = $this->client->get('https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
 		
 		if($res->getStatusCode() == 200)
 		{
