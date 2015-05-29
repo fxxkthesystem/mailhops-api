@@ -26,8 +26,6 @@ class MailHops{
 	
 	private $reverse_host		= true;
 	
-	private $db_on				= false;
-	
 	private $gi 				= null;
 
 	private $gi6 				= null;
@@ -38,9 +36,13 @@ class MailHops{
 
 	private $forecast			= null;
 
+	private $connection 		= null;
+
 	private $language 			= 'en';
 
 	private $unit 				= 'mi';
+
+	private $config				= null;
 
 	const IMAGE_URL 			= 'http://api.mailhops.com/v1/images/';
 	
@@ -51,6 +53,12 @@ class MailHops{
 	const DNS_SERVER 			= '208.67.222.222';
 
 	public function __construct(){
+
+		if(file_exists(__DIR__.'/../../config.json')){
+			//read config file
+			$config = @file_get_contents(__DIR__.'/../../config.json');
+			$this->config = @json_decode($config);
+		}
 
 		$this->unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','ki')))?$_GET['u']:'mi';
 		
@@ -89,9 +97,19 @@ class MailHops{
 		$this->dnsbl = new Net_DNSBL();
 		$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
 
-		$this->w3w = new What3Words(array('lang'=>$this->language));
+		if($this->config && !empty($this->config->w3w->api_key))
+			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
+		
+		if($this->config && !empty($_GET['fkey']))
+			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
+		else if($this->config && !empty($this->config->forecastio->api_key))
+			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
-		$this->forecast = new ForecastIO(array('api_key'=>!empty($_GET['fkey'])?$_GET['fkey']:'','unit'=>$this->unit));
+		if($this->config && !empty($this->config->mongodb->host))
+			$this->connection = new Connection($this->config->mongodb);
+			//unset the connection of Connect fails
+			if(!$this->connection->Connect())
+				$this->connection = null;
 	}
 	
 	public function setReverseHost($show){
@@ -145,15 +163,14 @@ class MailHops{
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
 				
-				if($this->db_on){
-					if(!empty($route['countryCode'])){
-						self::logCountry($route['countryCode'],$origin);
-						if($route['countryCode']=='US' && !empty($route['state']))
-							self::logState($route['state'],$origin);
-					}
-				} 
+				if(!empty($route['countryCode'])){
+					self::logCountry($route['countryCode'],$origin);
+					if($route['countryCode']=='US' && !empty($route['state']))
+						self::logState($route['state'],$origin);
+				}
+			
 				//just get the weather for the sender location
-				if(!$got_weather && ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
+				if(!$got_weather && $this->forecast && ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
 					$route['weather']=$weather;
 					$got_weather=true;
 				}
@@ -378,9 +395,8 @@ class MailHops{
 									,'zip'=>!empty($location->postal->code)?$location->postal->code:''
 									,'countryName'=>self::getLanguageValue($location->country->names)
 									,'countryCode'=>!empty($location->country->isoCode)?$location->country->isoCode:''
-									,'w3w'=>(!empty($this->w3w))?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
+									,'w3w'=>($this->w3w)?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
 								);
-
 
 					if(!empty($this->last_location)){
 						if($this->last_location['city']!=$loc_array['city']){
@@ -450,62 +466,48 @@ class MailHops{
 	
 	
 	private function logApp($version){
-		if(!$this->db_on)
+		if(!$this->connection)
 			return false;
 			
-		$connection = new Connection();
-		if($connection->Connect()){
-			$collection = $connection->getConn()->stats;
-			$collection->update(array('version'=>$version,'day'=>(int)date('Ymd'))
-				,array('$inc'=>array("count"=>1)
-						,'$set'=>array('day'=>(int)date('Ymd')))
-				,array('upsert'=>true,'safe'=>true,'multiple'=>false));	
-			
-		}
+		$collection = $this->connection->getConn()->stats;
+		$collection->update(array('version'=>$version,'day'=>(int)date('Ymd'))
+			,array('$inc'=>array("count"=>1)
+					,'$set'=>array('day'=>(int)date('Ymd')))
+			,array('upsert'=>true,'safe'=>true,'multiple'=>false));	
+		
 	}
 	
 	private function logCountry($country_code,$origin){
-		if(!$this->db_on)
+		if(!$this->connection)
 			return false;
 			
 		$field = $origin==1?"origin_count":"count";
-		$connection = new Connection();
-		if($connection->Connect()){
-			$collection = $connection->getConn()->countries;
-			$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
-				,array('$inc'=>array("$field"=>1))
-				,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
-			
-		}
+		$collection = $this->connection->getConn()->countries;
+		$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
+			,array('$inc'=>array("$field"=>1))
+			,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
 	}
 	
 	private function logState($state_abbr,$origin){
-		if(!$this->db_on)
+		if(!$this->connection)
 			return false;
 			
 		$field = $origin==1?"origin_count":"count";
-		$connection = new Connection();
-		if($connection->Connect()){
-			$collection = $connection->getConn()->states;
-			$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
-				,array('$inc'=>array("$field"=>1))
-				,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
-			
-		}
+		$collection = $this->connection->getConn()->states;
+		$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
+			,array('$inc'=>array("$field"=>1))
+			,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
 	}
 	
 	private function getCountryCode($country){
-		if(!$this->db_on)
+		if(!$this->connection)
 			return false;
 		
-		$connection = new Connection();
 		$results = array();
-		if($connection->Connect()){
-			$collection = $connection->getConn()->countries;
-			$cursor=$collection->find(array('name'=>new MongoRegex('/^'.$country.'$/i')),array('iso'=>1))->limit(1);
-			$results = iterator_to_array($cursor,false);				
-			
-		}	
+		$collection = $this->connection->getConn()->countries;
+		$cursor = $collection->find(array('name'=>new MongoRegex('/^'.$country.'$/i')),array('iso'=>1))->limit(1);
+		$results = iterator_to_array($cursor,false);				
+		
 		if(Error::hasError() || empty($results[0]['iso']))
 			return false;
 		else{
@@ -514,17 +516,14 @@ class MailHops{
 	}
 	
 	private function getCountryName($iso){		
-		if(!$this->db_on)
+		if(!$this->connection)
 			return false;
 			
-		$connection = new Connection();
 		$results = array();
-		if($connection->Connect()){
-			$collection = $connection->getConn()->countries;
-			$cursor=$collection->find(array('iso'=>new MongoRegex('/^'.$iso.'$/i')),array('printable_name'=>1))->limit(1);
-			$results = iterator_to_array($cursor,false);				
-			
-		}	
+		$collection = $this->connection->getConn()->countries;
+		$cursor = $collection->find(array('iso'=>new MongoRegex('/^'.$iso.'$/i')),array('printable_name'=>1))->limit(1);
+		$results = iterator_to_array($cursor,false);				
+		
 		if(Error::hasError() || empty($results[0]['printable_name']))
 			return false;
 		else{
@@ -533,17 +532,14 @@ class MailHops{
 	}
 	
 	private function isUnitedStates($state){
-		if(!$this->db_on)
+		if(!$this->connection)
 			return false;
 		
-		$connection = new Connection();
 		$results = array();
-		if($connection->Connect()){
-			$collection = $connection->getConn()->states;
-			$cursor=$collection->find(array('abbr'=>new MongoRegex('/^'.$state.'$/i')),array('name'=>1))->limit(1);
-			$results = iterator_to_array($cursor,false);				
-			
-		}	
+		$collection = $this->connection->getConn()->states;
+		$cursor = $collection->find(array('abbr'=>new MongoRegex('/^'.$state.'$/i')),array('name'=>1))->limit(1);
+		$results = iterator_to_array($cursor,false);				
+		
 		if(Error::hasError() || empty($results[0]['name']))
 			return false;
 		else{

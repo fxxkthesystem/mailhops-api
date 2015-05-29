@@ -11,14 +11,15 @@ class Connection
 	/*MongoDB Connection info for use with MailHops
 		Signup: mongolab.com
 		Download: mongorestore binary is available from http://www.mongodb.org/downloads
-		Run: mongorestore -h [host:port] -d mailhops -u [user] -p [pass] mailhops/v1/mongo/mailhops/
+		Run: mongorestore -h [host:port] -d mailhops -u [user] -p [pass] v1/mongo/mailhops/
 	*/
 	protected $user = '';
 	
 	protected $pass = '';
 	
-	//host:port
 	protected $host = '';
+
+	protected $port = '27017';
 	
 	protected $db 	= 'mailhops';
 		
@@ -32,9 +33,22 @@ class Connection
 	
 	protected $debug = false;
 			
-	public function __construct($db=null){
-		if(!empty($db))
-			$this->db=$db;		
+	public function __construct($config){
+
+		if(!empty($config->host))
+			$this->host = $config->host;
+
+		if(!empty($config->port))
+			$this->port = $config->port;
+
+		if(!empty($config->user))
+			$this->user = $config->user;
+
+		if(!empty($config->pass))
+			$this->pass = $config->pass;
+
+		if(!empty($config->db))
+			$this->db = $config->db;		
 	}
 	
 	public function getConn()
@@ -55,9 +69,15 @@ class Connection
 	public function Connect()
 	{
 		$error='';
+		if(empty($this->host))
+			return false;
+
 		try
 		{
-			$link = new MongoClient("mongodb://".$this->user.":".$this->pass."@".$this->host.'/'.$this->db);
+			if(!empty($this->user) && !empty($this->pass))
+				$link = new MongoClient("mongodb://".$this->user.":".$this->pass."@".$this->host.':'.$this->port.'/'.$this->db);
+			else
+				$link = new MongoClient("mongodb://".$this->host.':'.$this->port.'/'.$this->db);
 			
 			if(!empty($link)){
 				$this->link=$link;

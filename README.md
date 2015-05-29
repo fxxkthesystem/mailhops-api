@@ -47,25 +47,31 @@ MaxMind updates on the first Tuesday of the month so lets run this at midnight o
 
 ## Setup map dependencies
 ```sh 
-# this will run bower and gulp
+# this will run bower
+$ npm install -g bower
 $ npm install
 ```
 
-## Options
+## Options 
+options are set in the config.json file
 
-### setup mongo for stats
-
-```sh 
-$ pecl install mongo
-```
-
-Set user/pass in lib/Connection.php
-Set $db_on = true in lib/MailHops.php
-
-### setup w3w API key in the json config file
 ```sh
 $ mv config.sample.json config.json
 ```
+
+### MongoDB
+Add connection info in
+```sh 
+$ pecl install mongo
+# install default collections
+$ mongorestore -h [host:port] -d mailhops -u [user] -p [pass] v1/mongo/mailhops/
+```
+
+### what3words
+Add API key in the config.json
+
+### forecast.io
+Add API key in the config.json
 
 ## Test it out
 ```sh

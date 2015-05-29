@@ -13,31 +13,15 @@ class ForecastIO {
 	
 	public function __construct($args=array()){		
 		
-		if(!empty($args['unit']) && $args['unit']=='ki'){
-			$this->units = 'uk';
-		}
-
-		//get key
+		//get api key
 		if(!empty($args['api_key'])){
 			$this->api_key = $args['api_key'];			
-		} 
-		else if(file_exists(__DIR__.'/../../config.json')){
-			//read config file
-			$config = @file_get_contents(__DIR__.'/../../config.json');
-			$config_json = @json_decode($config);
-
-			//get w3w api key
-			if(!empty($config_json->forecastio->api_key))
-				$this->api_key = $config_json->forecastio->api_key;
-		} 
-
-		if(!empty($this->api_key)) {
-			//setup caching
 			$this->client = new Client();
 			CacheSubscriber::attach($this->client);
-		} else {
-			error_log('Missing config.json file.');
-			return null;
+		} 
+
+		if(!empty($args['unit']) && $args['unit']=='ki'){
+			$this->units = 'uk';
 		}
 	}
 

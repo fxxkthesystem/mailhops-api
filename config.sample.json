@@ -1,4 +1,11 @@
 {
 	"w3w": {"api_key":""}
 	,"forecastio": {"api_key":""}
+	,"mongodb":{
+		"host":""
+		,"port":27017
+		,"user":""
+		,"pass":""
+		,"db":"mailhops"
+	}
 }

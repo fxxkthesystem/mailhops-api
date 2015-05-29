@@ -14,26 +14,16 @@ class What3Words {
 	private $client			= null;	
 
 	public function __construct($args=array()){		
-		if(file_exists(__DIR__.'/../../config.json')){
-			//read config file
-			$config = @file_get_contents(__DIR__.'/../../config.json');
-			$config_json = @json_decode($config);
 
-			//get w3w api key
-			if(!empty($config_json->w3w->api_key))
-				$this->api_key = $config_json->w3w->api_key;
-			
-			if(!empty($args) && isset($args['lang']) && in_array($args['lang'], array('en','de','es','fr','pt-BR','ru')))
-				$this->language = $args['lang']=='pt-BR'?'pt':$args['lang'];
-
-			//setup caching
+		//get api key
+		if(!empty($args['api_key'])){
+			$this->api_key = $args['api_key'];			
 			$this->client = new Client();
 			CacheSubscriber::attach($this->client);
+		} 
 
-		} else {
-			error_log('Missing config.json file.');
-			return null;
-		}
+		if(!empty($args['lang']) && in_array($args['lang'], array('en','de','es','fr','pt-BR','ru')))
+			$this->language = $args['lang']=='pt-BR'?'pt':$args['lang'];
 	}
 
 	public function getWords($lat,$lng){
