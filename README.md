@@ -8,7 +8,7 @@ MailHops is an email route API. It does two things:
 1. Returns a route an email took based on the Received header IP addresses
 2. Returns a map an email took based on the Received header IP addresses
 
-The route will contain DNSBL lookup results, hostname lookup results and What3Words geo locations. 
+The route will contain DNSBL lookup results, hostname lookup results, what3words geo locations and the current weather of the senders location.
 
 ## Configuring MailHops API
 
@@ -59,20 +59,27 @@ $ mv config.sample.json config.json
 ```
 
 ### MongoDB
-Add connection info in
+Add connection info in config.json
+
 ```sh 
+# install the mongo PHP driver
 $ pecl install mongo
+
+# add extension=mongo.so to the php.ini
+# php5 not stores it in
+$ vim /etc/php-5.5.ini
+
 # install default collections
 $ mongorestore -h [host:port] -d mailhops -u [user] -p [pass] v1/mongo/mailhops/
 ```
 
 ### what3words
-Add API key in the config.json
+Add API key in config.json
 
 ### forecast.io
-Add API key in the config.json
+Add API key in config.json
 
-## Test it out
+## If running locally, test it out with
 ```sh
 $ php -S 127.0.0.1:8080 -t .
 ```
