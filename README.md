@@ -1,4 +1,5 @@
-# MailHops
+# MailHops API
+[www.MailHops.com](http://www.mailhops.com)
 
 <img src="http://www.mailhops.com/images/logos/mailhops395.png" width="200" alt="MailHops logo" title="MailHops" align="right" />
 
@@ -61,3 +62,7 @@ $ mv config.sample.json config.json
 ```sh
 $ php -S 127.0.0.1:8080 -t .
 ```
+
+## Plugins
+- [Postbox](https://github.com/avantassel/mailhops-postbox)
+- [Thunderbird](https://github.com/avantassel/mailhops-thunderbird)
