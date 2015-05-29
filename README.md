@@ -35,7 +35,7 @@ $ yum remove php*
 $ yum remove httpd.x86_64 httpd-devel.x86_64 httpd-tools.x86_64
 
 $ yum install httpd24.x86_64 httpd24-devel.x86_64 httpd24-tools.x86_64
-$ yum install php55.x86_64 php55-common.x86_64
+$ yum install php55.x86_64 php55-common.x86_64 php55-devel.x86_64
 $ yum install nodejs npm
 ```
 
@@ -47,7 +47,6 @@ MaxMind updates on the first Tuesday of the month so lets run this at midnight o
 
 ## Setup map dependencies
 ```sh 
-# this will run bower
 $ npm install -g bower
 $ npm install
 ```

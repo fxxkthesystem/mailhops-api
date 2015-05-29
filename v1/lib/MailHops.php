@@ -105,11 +105,12 @@ class MailHops{
 		else if($this->config && !empty($this->config->forecastio->api_key))
 			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
-		if($this->config && !empty($this->config->mongodb->host))
+		if($this->config && !empty($this->config->mongodb->host)){
 			$this->connection = new Connection($this->config->mongodb);
 			//unset the connection of Connect fails
-			if(!$this->connection->Connect())
+			if($this->connection && !$this->connection->Connect())
 				$this->connection = null;
+		}
 	}
 	
 	public function setReverseHost($show){
