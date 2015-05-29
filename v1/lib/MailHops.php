@@ -24,8 +24,6 @@ class MailHops{
 	
 	private $total_kilometers	= 0;
 	
-	private $show_weather		= false;
-	
 	private $reverse_host		= true;
 	
 	private $db_on				= false;
@@ -38,6 +36,8 @@ class MailHops{
 
 	private $w3w				= null;
 
+	private $forecast			= null;
+
 	private $language 			= 'en';
 
 	const IMAGE_URL 			= 'http://api.mailhops.com/v1/images/';
@@ -48,7 +48,7 @@ class MailHops{
 	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
 	const DNS_SERVER 			= '208.67.222.222';
 
-	public function __construct(){
+	public function __construct($args=array()){
 
 		if(!empty($_GET['route']))
 			$this->ips = explode(',',$_GET['route']);
@@ -86,6 +86,8 @@ class MailHops{
 		$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
 
 		$this->w3w = new What3Words(array('lang'=>$this->language));
+
+		$this->forecast = new ForecastIO($args);
 	}
 	
 	public function setReverseHost($show){
@@ -104,6 +106,7 @@ class MailHops{
 	$time = explode(' ', $time);
 	$time = $time[1] + $time[0];
 	$start = $time;
+	$got_weather = false;
 	
 	$mail_route=array();
 
@@ -145,6 +148,11 @@ class MailHops{
 							self::logState($route['state'],$origin);
 					}
 				} 
+				//just get the weather for the sender location
+				if(!$got_weather && ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
+					$route['weather']=$weather;
+					$got_weather=true;
+				}
 				$origin++;
 			} else {
 				$route = array('ip'=>$ip,'private'=>true,'local'=>true);				

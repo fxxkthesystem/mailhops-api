@@ -13,8 +13,9 @@ All notable changes to this project will be documented in this file.
 - Language support for 'de','en','es','fr','ja','pt-BR','ru','zh-CN'
 - What3Words, see README for adding and API key
 - Composer for PHP libraries
-- Npm and gulp for new map styles
+- Npm, bower and gulp for new map styles
 - .htaccess file
+- Forecast.IO to get the senders weather
 
 ### Fixed
 - Fix map panning

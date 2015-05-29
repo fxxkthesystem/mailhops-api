@@ -15,6 +15,7 @@ The route will contain DNSBL lookup results, hostname lookup results and What3Wo
 Get the geoip files, you can also setup a cron job to pull this monthly
 
 ```sh
+$ mkdir geoip
 $ ./cron_get_geoip.sh
 ```
 
@@ -28,6 +29,14 @@ $ composer install
 $ curl -O http://pear.php.net/go-pear.phar
 $ sudo php -d detect_unicode=0 go-pear.phar
 $ sudo pear install Net_DNSBL
+
+# PHP 5.5 Update (AWS)
+$ yum remove php*
+$ yum remove httpd.x86_64 httpd-devel.x86_64 httpd-tools.x86_64
+
+$ yum install httpd24.x86_64 httpd24-devel.x86_64 httpd24-tools.x86_64
+$ yum install php55.x86_64 php55-common.x86_64
+$ yum install nodejs npm
 ```
 
 ## Updated the GeoIP file
@@ -38,7 +47,7 @@ MaxMind updates on the first Tuesday of the month so lets run this at midnight o
 
 ## Setup map dependencies
 ```sh 
-# this will run gulp
+# this will run bower and gulp
 $ npm install
 ```
 

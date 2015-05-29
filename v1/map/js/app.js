@@ -1,5 +1,40 @@
-var mailHops = angular.module('mailHops',['leaflet-directive'])
-.controller('mainController', ['$scope', 'leafletData', function($scope,leafletData) {
+angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'])
+.controller('ModalInstanceCtrl', function ($scope, $sce, $modalInstance, url, title) {
+
+  if(url == 'twitter'){
+       $scope.url = url
+  } else {
+       $scope.url = $sce.trustAsResourceUrl(url);
+  }
+  
+  $scope.title = title;  
+
+  $scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+  };
+})
+.filter('weather',function(){
+    return function(icon){
+        var forecast_icons = {'clear-day': {'day':'wi-day-sunny', 'night':'wi-day-sunny'}
+            , 'clear-night': {'day':'wi-night-clear', 'night':'wi-night-clear'}
+            , 'rain': {'day':'wi-day-rain','night':'wi-night-alt-rain'}
+            , 'snow': {'day':'wi-day-snow','night':'wi-night-alt-snow'}
+            , 'sleet': {'day':'wi-sleet','night':'wi-night-alt-rain-mix'}
+            , 'wind': {'day':'wi-day-cloudy-windy','night':'wi-night-alt-cloudy-windy'}
+            , 'fog': {'day':'wi-day-fog','night':'wi-night-fog'}
+            , 'cloudy': {'day':'wi-day-cloudy','night':'wi-night-cloudy'}
+            , 'partly-cloudy-day': {'day':'wi-day-cloudy','night':'wi-day-cloudy'}
+            , 'partly-cloudy-night': {'day':'wi-night-cloudy','night':'wi-night-cloudy'}
+            , 'hail': {'day':'wi-day-hail','night':'wi-night-alt-hail'}
+            , 'thunderstorm': {'day':'wi-day-thunderstorm','night':'wi-thunderstorm'}
+            , 'tornado': {'day':'wi-tornado','night':'wi-tornado'}
+        };
+        var hr = (new Date).getHours();
+        var time = (hr >= 4 && hr <= 18)?'day':'night';
+        return 'wi '+forecast_icons[icon][time];
+    };
+})
+.controller('mainController', function($scope, leafletData, $modal) {
         
         $scope.route = mailRoute.response.route;
         $scope.map_unit = mapUnit;
@@ -8,19 +43,26 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
         $scope.markers = [];     
         $scope.templates = [];   
         $scope.distance = '';
+        $scope.modalInstance;
 
-        function addCommas(nStr)
-        {
-            nStr += '';
-            var x = nStr.split('.');
-            var x1 = x[0];
-            var x2 = x.length > 1 ? '.' + x[1] : '';
-            var rgx = /(\d+)(\d{3})/;
-            while (rgx.test(x1)) {
-                x1 = x1.replace(rgx, '$1' + ',' + '$2');
-            }
-            return x1 + x2;
-        }
+        $scope.open = function (size,url,title) {
+            $scope.url = url;
+            $scope.title = title;
+
+            var modalInstance = $modal.open({
+              animation: true,
+              templateUrl: 'content.html',
+              controller: 'ModalInstanceCtrl',
+              size: size,
+              resolve: {
+                url: function () {
+                  return $scope.url;                    
+                },title: function () {                    
+                  return $scope.title;
+                }
+              }
+            });
+        };
 
         var hopLines = [];
         var prevHopFocused;
@@ -45,9 +87,9 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
         });
 
         if($scope.map_unit=='k')
-            $scope.distance = addCommas(Math.round(mailRoute.response.distance.kilometers))+' ki';            
+            $scope.distance = mailRoute.response.distance.kilometers;            
         else
-            $scope.distance = addCommas(Math.round(mailRoute.response.distance.miles))+' mi';
+            $scope.distance = mailRoute.response.distance.miles;
 
         angular.forEach($scope.route, function(r) {
             if(r.lat){
@@ -114,4 +156,4 @@ var mailHops = angular.module('mailHops',['leaflet-directive'])
         $scope.$on('leafletDirectiveMarker.click', function (e, a){
             $scope.showMarker(a.model.hopnum);            
           });
-}]);
+});

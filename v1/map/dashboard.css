@@ -75,10 +75,13 @@ body {
 
 .hop .host {
   color: #337ab7;
+  cursor: pointer;
 }
 
 .hop .words {
   color: #E6323D;
+  cursor: pointer;
+
  }
 
 .hop.active{
@@ -145,4 +148,29 @@ body {
 
 .main .page-header {
   margin-top: 0;
+}
+
+.modal-dialog {
+  width: 90%;
+  height: 90%;
+  padding: 0;
+}
+
+.modal-content { 
+  height: 100%; 
+}
+
+.modal-body {
+  height: 90%; 
+  overflow: scroll;
+}
+
+.modal-close {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
+
+.fa-twitter{
+  cursor: pointer;
 }

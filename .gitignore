@@ -1,6 +1,7 @@
 geoip/*
 vendor/*
 node_modules
+bower_components
 config.json
 *.log
 composer.lock

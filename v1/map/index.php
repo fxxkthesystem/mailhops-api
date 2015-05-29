@@ -4,16 +4,15 @@ if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
     die('Project dependencies missing');
 }
 
-$mailhops = new MailHops();
-$mailhops->setReverseHost(true);
-
 $map_unit=isset($_GET['unit'])?$_GET['unit']:'mi';
 $map_unit=isset($_GET['u'])?$_GET['u']:$map_unit;
 
-$map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
+$fkey=isset($_GET['fkey'])?$_GET['fkey']:'';
 
-$show_weather=isset($_GET['weather'])?(string)Util::toBoolean($_GET['weather']):'false';
-$show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
+$mailhops = new MailHops(array('unit'=>$map_unit,'forecast_api_key'=>$fkey));
+$mailhops->setReverseHost(true);
+
+$map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
 
 ?>
 <!DOCTYPE html>   
@@ -26,10 +25,11 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
 	<meta name="author" content="MailHops.com">
 	<link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
-	<link rel="stylesheet" href="dashboard.css">	
-	<link rel="stylesheet" href="/node_modules/leaflet/dist/leaflet.css">
-	<link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
-  
+  <link rel="stylesheet" href="/node_modules/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/bower_components/weather-icons/css/weather-icons.min.css">
+	<link rel="stylesheet" href="dashboard.css">
+  <script type="text/javascript" async src="//platform.twitter.com/widgets.js"></script>
 	<script> 
 		var mailRoute = <?=$mailhops->getRoute()?>
 			, mapUnit = '<?=$map_unit?>'
@@ -39,6 +39,17 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
 </head>
 <!-- !Body -->
 <body ng-controller="mainController"> 
+  <script type="text/ng-template" id="content.html">
+       <div class="modal-header">
+            <h3 class="modal-title">{{title}}</h3>
+            <button class="btn btn-warning modal-close" ng-click="cancel()">Close</button>
+        </div>
+        <div class="modal-body">
+            <div ng-if="url=='twitter'" twitter-timeline="604321882163171328" auto-resize="true" data-tweet-limit="20">Loading tweets...<i class="fa fa-cog fa-spin fa-3x"></i></div>
+            <iframe ng-if="url!='twitter'" ng-src="{{url}}" width="100%" height="100%" frameborder="0"></iframe>
+        </div>        
+  </script>
+
 	<nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">          
@@ -46,7 +57,7 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
         </div>
         <div>
 	      	<ul class="nav navbar-nav">
-	        	<li class="active"><a>This message traveled {{distance}}</a></li>
+	        	<li class="active" ng-if="distance"><a>This message traveled {{distance | number:0}} <?=$map_unit?></a></li>
             <li role="presentation" class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
                 Templates <span class="caret"></span>
@@ -61,7 +72,7 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
     	   </div>          
           <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="https://twitter.com/intent/tweet?text=This email traveled {{distance}}. <?='http://api.mailhops.com'.$_SERVER['REQUEST_URI']?> @MailHops"><i class="fa fa-lg fa-twitter"></i></a></li>
+            <li><a ng-click="open('','twitter','@MailHops')"><i class="fa fa-lg fa-twitter"></i></a></li>
           </ul>          
         </div>
       </div>
@@ -85,9 +96,11 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
                   <span ng-if="r.countryName"><img ng-src="{{r.flag}}"/> {{r.countryName}} ({{r.countryCode}})<br/></span>
                   <span ng-if="r.city">{{r.city}}, {{r.state}}<br/></span>
 
-          				<span>{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
-          				<span ng-if="r.host" class="host">{{r.host}}<br/></span>
-          				<span ng-if="r.w3w" class="words">{{r.w3w.words.join('.')}}</span>
+                  <span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}<br/></span>
+
+          				<span class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip,'whois')">{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
+          				<span ng-if="r.host" class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip,'whois')">{{r.host}}<br/></span>
+          				<span ng-if="r.w3w" class="words" ng-click="open('',r.w3w.url,'what3words')">{{r.w3w.words.join('.')}}</span>
           			</div>
 
           	</li>          
@@ -101,13 +114,14 @@ $show_weather=isset($_GET['w'])?$_GET['w']:$show_weather;
   	</div>
   </div>
 
-  <script type="text/javascript" async src="//platform.twitter.com/widgets.js"></script>   
-	<script src="/node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="/node_modules/jquery/dist/jquery.min.js"></script>
 	<script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="/node_modules/leaflet/dist/leaflet.js"></script>
 	<script src="/node_modules/leaflet-providers/leaflet-providers.js"></script>
 	<script src="/node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
-	<script src="js/L.Geodesic.js"></script>
+	<script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+  <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
+  <script src="/bower_components/twitter-timeline-angularjs/src/twitter-timeline.js"></script>
 	<script src="js/app.js"></script>	
 </body>
 </html>
