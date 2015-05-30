@@ -10,18 +10,15 @@ MailHops is an email route API. It does two things:
 
 The route will contain DNSBL lookup results, hostname lookup results, what3words geo locations and the current weather of the senders location.
 
-## Configuring MailHops API
+## Install
 
-Get the geoip files, you can also setup a cron job to pull this monthly
-
-```sh
-$ mkdir geoip
-$ ./cron_get_geoip.sh
-```
-
-### Install composer and pear
+Get the geoip file, install composer, pear, node, npm and php 5.5 or greater
 
 ```sh 
+# get the geoip binary file from MaxMind
+$ mkdir geoip
+$ ./cron_get_geoip.sh
+
 $ curl -sS https://getcomposer.org/installer | php
 $ mv composer.phar /usr/local/bin/composer
 $ composer install
@@ -36,14 +33,17 @@ $ yum remove httpd.x86_64 httpd-devel.x86_64 httpd-tools.x86_64
 
 $ yum install httpd24.x86_64 httpd24-devel.x86_64 httpd24-tools.x86_64
 $ yum install php55.x86_64 php55-common.x86_64 php55-devel.x86_64
+
 $ yum install nodejs npm
 ```
 
-## Updated the GeoIP file
+## Setup the GeoIP cron job
 
 MaxMind updates on the first Tuesday of the month so lets run this at midnight on the first Wednesday
 
+```sh
 0 0 *  * 3 /path/to/cron_get_geoip.sh
+```
 
 ## Setup map dependencies
 ```sh 
@@ -66,7 +66,7 @@ Add connection info in config.json
 $ pecl install mongo
 
 # add extension=mongo.so to the php.ini
-# php5 not stores it in
+# php5 now stores it in
 $ vim /etc/php-5.5.ini
 
 # install default collections
