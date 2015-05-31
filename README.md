@@ -84,6 +84,6 @@ Add API key in config.json
 $ php -S 127.0.0.1:8080 -t .
 ```
 
-## Plugins
-- [Postbox](https://github.com/avantassel/mailhops-postbox)
-- [Thunderbird](https://github.com/avantassel/mailhops-thunderbird)
+## Plugins for Postbox and Thunderbird
+- [Postbox & Thunderbird](https://github.com/avantassel/mailhops-plugin)
+- [Download](https://addons.mozilla.org/en-US/thunderbird/addon/mailhops/)

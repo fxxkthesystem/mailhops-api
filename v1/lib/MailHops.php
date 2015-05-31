@@ -77,13 +77,6 @@ class MailHops{
 		if(empty($app_version))
 			$app_version=isset($_GET['a'])?$_GET['a']:'';
 		
-		if(!empty($app_version)){
-			if(isset($_GET['pb']) && Util::getVersion($app_version) <= '065')
-				$this->ips=array_reverse($this->ips);
-			else if(isset($_GET['tb']) && Util::getVersion($app_version) <= '05')
-				$this->ips=array_reverse($this->ips);
-		}			
-		
 		//log the app and version, keep a daily count for stats
 		if(!empty($app_version)){
 			self::logApp($app_version);
