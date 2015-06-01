@@ -456,8 +456,7 @@ class MailHops{
 		}
 	
 		return $dist;
-	}  
-	
+	} 
 	
 	private function logApp($version){
 		if(!$this->connection)
@@ -467,7 +466,7 @@ class MailHops{
 		$collection->update(array('version'=>$version,'day'=>(int)date('Ymd'))
 			,array('$inc'=>array("count"=>1)
 					,'$set'=>array('day'=>(int)date('Ymd')))
-			,array('upsert'=>true,'safe'=>true,'multiple'=>false));	
+			,array('upsert'=>true,'w'=>0,'multiple'=>false));	
 		
 	}
 	
@@ -479,7 +478,7 @@ class MailHops{
 		$collection = $this->connection->getConn()->countries;
 		$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
 			,array('$inc'=>array("$field"=>1))
-			,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
+			,array('upsert'=>false,'w'=>0,'multiple'=>false));	
 	}
 	
 	private function logState($state_abbr,$origin){
@@ -490,7 +489,7 @@ class MailHops{
 		$collection = $this->connection->getConn()->states;
 		$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
 			,array('$inc'=>array("$field"=>1))
-			,array('upsert'=>false,'safe'=>true,'multiple'=>false));	
+			,array('upsert'=>false,'w'=>0,'multiple'=>false));	
 	}
 	
 	private function getCountryCode($country){
