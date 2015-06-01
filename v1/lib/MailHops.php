@@ -77,11 +77,6 @@ class MailHops{
 		if(empty($app_version))
 			$app_version=isset($_GET['a'])?$_GET['a']:'';
 		
-		//log the app and version, keep a daily count for stats
-		if(!empty($app_version)){
-			self::logApp($app_version);
-		}
-
 		//setup geoip
 		if(file_exists(__DIR__."/../../geoip/GeoLite2-City.mmdb"))
 			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
@@ -103,6 +98,11 @@ class MailHops{
 			//unset the connection of Connect fails
 			if($this->connection && !$this->connection->Connect())
 				$this->connection = null;
+		}
+
+		//log the app and version, keep a daily count for stats
+		if(!empty($app_version)){
+			self::logApp($app_version);
 		}
 	}
 	
