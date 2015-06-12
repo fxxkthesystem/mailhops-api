@@ -121,12 +121,14 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
             });
 
         leafletData.getMap('map').then(function(map) {
-            L.tileLayer.provider($scope.map_provider).addTo(map);
-
+            
             if(hopLines.length>0){
                 var polyline = L.geodesicPolyline(hopLines, {color: '#428bca'}).addTo(map);
                 map.fitBounds(polyline.getBounds());                
             }
+
+            if($scope.map_provider && $scope.map_provider != '')
+                L.tileLayer.provider($scope.map_provider).addTo(map);
         });
 
         $scope.changeTemplate = function(template){
