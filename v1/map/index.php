@@ -8,7 +8,7 @@ $mailhops->setReverseHost(true);
 
 $map_unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','ki')))?$_GET['u']:'mi';
 $fkey     = !empty($_GET['fkey'])?$_GET['fkey']:'';
-$map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
+$map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 
 ?>
 <!DOCTYPE html>   
@@ -56,7 +56,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
 	        	<li class="active" ng-if="distance"><a>This message traveled {{distance | number:0}} <?=$map_unit?></a></li>
             <li role="presentation" class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                Templates <span class="caret"></span>
+                Map Templates <span class="caret"></span>
               </a>
               <ul class="dropdown-menu scrollable-menu" role="menu">
                 <li ng-repeat="t in templates track by $index">
@@ -115,7 +115,8 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'Stamen.Watercolor';
 	<script src="/node_modules/leaflet/dist/leaflet.js"></script>
 	<script src="/node_modules/leaflet-providers/leaflet-providers.js"></script>
 	<script src="/node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
-	<script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+	<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>
+  <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
   <script src="/bower_components/twitter-timeline-angularjs/src/twitter-timeline.js"></script>
 	<script src="js/app.js"></script>	

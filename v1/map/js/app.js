@@ -1,4 +1,4 @@
-angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'])
+angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline','ngCookies'])
 .controller('ModalInstanceCtrl', function ($scope, $sce, $modalInstance, url, title) {
 
     
@@ -35,11 +35,11 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
         return 'wi '+forecast_icons[icon][time];
     };
 })
-.controller('mainController', function($scope, leafletData, $modal) {
+.controller('mainController', function($scope, leafletData, $modal, $cookies) {
         
         $scope.route = mailRoute.response.route;
         $scope.map_unit = mapUnit;
-        $scope.map_provider = mapProvider;
+        $scope.map_provider = $cookies.get('map_provider') || mapProvider;
 
         $scope.markers = [];     
         $scope.templates = [];   
@@ -134,6 +134,8 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
             leafletData.getMap('map').then(function(map) {
                 L.tileLayer.provider($scope.map_provider).addTo(map);
             });
+            
+            $cookies.put('map_provider',template);
         };        
 
         $scope.showMarker = function(hopnum){
