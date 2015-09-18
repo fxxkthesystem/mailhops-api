@@ -132,6 +132,7 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
         });
 
         $scope.changeTemplate = function(template){
+            
             $scope.map_provider = template;
             leafletData.getMap('map').then(function(map) {
                 L.tileLayer.provider($scope.map_provider).addTo(map);

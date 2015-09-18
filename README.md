@@ -31,10 +31,27 @@ $ sudo pear install Net_DNSBL
 $ yum remove php*
 $ yum remove httpd.x86_64 httpd-devel.x86_64 httpd-tools.x86_64
 
+# install web server
+$ yum install nginx
+# OR
 $ yum install httpd24.x86_64 httpd24-devel.x86_64 httpd24-tools.x86_64
-$ yum install php55.x86_64 php55-common.x86_64 php55-devel.x86_64
 
+$ cat nginx.conf >> /etc/nginx/conf.d/mailhops.conf
+
+$ yum install php55.x86_64 php55-common.x86_64 php55-devel.x86_64 php55-fpm
 $ yum install nodejs npm --enablerepo=epel
+
+# make sure httpd starts on boot
+$ chkconfig httpd on
+OR
+$ chkconfig nginx on
+$ chkconfig php-fpm-5.5 on
+
+$ /etc/init.d/httpd start
+# OR
+$ /etc/init.d/nginx start
+$ /etc/init.d/php-fpm-5.5 start
+
 ```
 
 ## Setup the GeoIP cron job
@@ -80,6 +97,8 @@ Add API key in config.json
 Add API key in config.json
 
 ## If running locally, test it out with
+You may want to use OpenDNS if running locally, there are issues with Google DNS servers.
+
 ```sh
 $ php -S 127.0.0.1:8080 -t .
 ```

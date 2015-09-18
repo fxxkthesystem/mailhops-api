@@ -147,7 +147,7 @@ class MailHops{
 					$route['host']=$hostname;
 				if($whois || (!$is_mailhops_site && !$dnsbl_checked && $ip==$dnsbl_ip)){
 					$dnsbl_checked=true;
-					$route['dnsbl']=self::getDNSBL($ip);					
+					// $route['dnsbl']=self::getDNSBL($ip);					
 				}	
 				
 				if(!empty($route['countryCode'])){
@@ -260,7 +260,7 @@ class MailHops{
 		if(self::isIPV6($ip))
 			return $return;		
 
-		try{
+		try {
 			if($this->dnsbl->isListed($ip,false)){
 				$results = $this->dnsbl->getDetails($ip);
 				if(isset($results) && substr($results['record'],0,7)=='127.0.0')
@@ -364,6 +364,14 @@ class MailHops{
 			return $field['en'];
 		return '';
 	}
+
+	private function parseCityFromTimeZone($timeZone){
+		if(isset($timeZone)){
+			$city = end(explode('/', $timeZone));
+			return str_replace('_', ' ', $city);
+		}
+		return '';
+	}
 	
 	private function getLocationMaxMind($ip,$hopnum)
 	{
@@ -376,13 +384,14 @@ class MailHops{
 		if(!empty($ip) && $this->gi)
 		{		
 			$location = $this->gi->city($ip);
+
 			try{
 				if(!empty($location)){
-					
+
 					$loc_array=array('ip'=>"$ip"
 									,'lat'=>$location->location->latitude
 									,'lng'=>$location->location->longitude
-									,'city'=>self::getLanguageValue($location->city->names)
+									,'city'=>(self::getLanguageValue($location->city->names) != '') ? self::getLanguageValue($location->city->names) : self::parseCityFromTimeZone($location->location->timeZone)
 									,'state'=>(!self::displayState($location->mostSpecificSubdivision->isoCode) && self::getLanguageValue($location->country->names) !='')
 										?utf8_encode(self::getLanguageValue($location->country->names))
 										:utf8_encode($location->mostSpecificSubdivision->isoCode)//shouldn't do display logic here but...
@@ -391,7 +400,7 @@ class MailHops{
 									,'countryCode'=>!empty($location->country->isoCode)?$location->country->isoCode:''
 									,'w3w'=>($this->w3w)?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
 								);
-
+					
 					if(!empty($this->last_location)){
 						if($this->last_location['city']!=$loc_array['city']){
 							$distance = self::getDistance($this->last_location,$loc_array);

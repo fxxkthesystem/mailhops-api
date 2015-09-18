@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2015-09-18
+### Changed
+- Added time zone parse for city if no city in MaxMind response
+
 ## [1.2.0] - 2015-05-31
 ### Changed
 - Update GeoIP to use new MaxMind GeoLite2-City

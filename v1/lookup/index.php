@@ -49,7 +49,7 @@ if(!empty($maintenance)){
 }
 
 header("Access-Control-Allow-Origin: *");
-header('Content-type: application/json');
+header('Content-Type: application/json');
 	
 if(isset($_GET['callback']))
 	echo $_GET['callback'] . ' (' . $json_map . ');';	
