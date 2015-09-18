@@ -90,7 +90,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
           			</div>
           			<div ng-if="!r.private">
                   <span ng-if="r.countryName"><img ng-src="{{r.flag}}"/> {{r.countryName}} ({{r.countryCode}})<br/></span>
-                  <span ng-if="r.city">{{r.city}}, {{r.state}}<br/></span>
+                  <span ng-if="r.city">{{r.city}}<span ng-if="r.state">, {{r.state}}</span><br/></span>
 
                   <span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}<br/></span>
 
