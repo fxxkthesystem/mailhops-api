@@ -96,7 +96,10 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
             if(r.lat){
                 r.focus = false;
                 var message = '<strong>#'+r.hopnum+'</strong> ';
-                message += (r.city !='')?r.city+', '+r.state:r.countryName;
+                if(r.city !='')
+                    message += r.city+', ';
+                message += (r.state !='') ? r.state : r.countryName;
+
                 //add hop to the markers
                 
                 $scope.markers[r.hopnum] = { lat: r.lat
