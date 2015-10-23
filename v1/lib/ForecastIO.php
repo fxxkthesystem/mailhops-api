@@ -10,17 +10,17 @@ class ForecastIO {
 	private $client			= null;
 
 	private $units			= 'us';//us or uk
-	
-	public function __construct($args=array()){		
-		
+
+	public function __construct($args=array()){
+
 		//get api key
 		if(!empty($args['api_key'])){
-			$this->api_key = $args['api_key'];			
+			$this->api_key = $args['api_key'];
 			$this->client = new Client();
 			CacheSubscriber::attach($this->client);
-		} 
+		}
 
-		if(!empty($args['unit']) && $args['unit']=='ki'){
+		if(!empty($args['unit']) && $args['unit']=='km'){
 			$this->units = 'uk';
 		}
 	}
@@ -31,11 +31,11 @@ class ForecastIO {
 			return '';
 
 		$res = $this->client->get('https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
-		
+
 		if($res->getStatusCode() == 200)
 		{
 			$return = $res->json();
-			
+
 			if(!empty($return['currently']))
 				return array(
 						'time'=>$return['currently']['time']

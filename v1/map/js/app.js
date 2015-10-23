@@ -1,14 +1,14 @@
 angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline','ngCookies'])
 .controller('ModalInstanceCtrl', function ($scope, $sce, $modalInstance, url, title) {
 
-    
+
   if(url == 'twitter'){
        $scope.url = url
   } else {
        $scope.url = $sce.trustAsResourceUrl(url);
-  }    
+  }
 
-  $scope.title = title;  
+  $scope.title = title;
 
   $scope.cancel = function () {
     $modalInstance.dismiss('cancel');
@@ -36,13 +36,13 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
     };
 })
 .controller('mainController', function($scope, leafletData, $modal, $cookies) {
-        
+
         $scope.route = mailRoute.response.route;
         $scope.map_unit = mapUnit;
         $scope.map_provider = $cookies.get('map_provider') || mapProvider;
 
-        $scope.markers = [];     
-        $scope.templates = [];   
+        $scope.markers = [];
+        $scope.templates = [];
         $scope.distance = '';
         $scope.modalInstance;
 
@@ -57,8 +57,8 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
               size: size,
               resolve: {
                 url: function () {
-                  return $scope.url;                    
-                },title: function () {                    
+                  return $scope.url;
+                },title: function () {
                   return $scope.title;
                 }
               }
@@ -80,15 +80,15 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
         angular.forEach(L.TileLayer.Provider.providers, function(k,v){
             if(k.variants){
                 angular.forEach(k.variants,function(key,variant){
-                    $scope.templates.push({name:v+'.'+variant});                    
+                    $scope.templates.push({name:v+'.'+variant});
                 })
             } else {
-                $scope.templates.push({'name':v});                
+                $scope.templates.push({'name':v});
             }
         });
 
-        if($scope.map_unit=='k')
-            $scope.distance = mailRoute.response.distance.kilometers;            
+        if($scope.map_unit=='km')
+            $scope.distance = mailRoute.response.distance.kilometers;
         else
             $scope.distance = mailRoute.response.distance.miles;
 
@@ -101,7 +101,7 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
                 message += (r.state !='') ? r.state : r.countryName;
 
                 //add hop to the markers
-                
+
                 $scope.markers[r.hopnum] = { lat: r.lat
                                             , lng: r.lng
                                             , message: message
@@ -113,7 +113,7 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
                 hopLines.push([r.lat,r.lng]);
             }
         });
-                
+
         angular.extend($scope, {
                 boulder: {
                     lat: 40.0274,
@@ -124,10 +124,10 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
             });
 
         leafletData.getMap('map').then(function(map) {
-            
+
             if(hopLines.length>0){
                 var polyline = L.geodesicPolyline(hopLines, {color: '#428bca'}).addTo(map);
-                map.fitBounds(polyline.getBounds());                
+                map.fitBounds(polyline.getBounds());
             }
 
             if($scope.map_provider && $scope.map_provider != '')
@@ -135,23 +135,23 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
         });
 
         $scope.changeTemplate = function(template){
-            
+
             $scope.map_provider = template;
             leafletData.getMap('map').then(function(map) {
                 L.tileLayer.provider($scope.map_provider).addTo(map);
             });
-            
+
             $cookies.put('map_provider',template);
-        };        
+        };
 
         $scope.showMarker = function(hopnum){
             if(prevHopFocused){
-                $scope.markers[prevHopFocused].focus = false;                                
+                $scope.markers[prevHopFocused].focus = false;
             }
 
             if($scope.markers[hopnum]){
                 $scope.markers[hopnum].focus = true;
-                prevHopFocused = hopnum;                
+                prevHopFocused = hopnum;
             }
             //route does not have index
             angular.forEach($scope.route,function(r){
@@ -163,6 +163,6 @@ angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline'
         };
 
         $scope.$on('leafletDirectiveMarker.click', function (e, a){
-            $scope.showMarker(a.model.hopnum);            
+            $scope.showMarker(a.model.hopnum);
           });
 });

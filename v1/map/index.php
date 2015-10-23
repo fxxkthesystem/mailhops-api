@@ -1,4 +1,4 @@
-<?php 
+<?php
 if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
     die('Project dependencies missing');
 }
@@ -6,15 +6,15 @@ if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
 $mailhops = new MailHops();
 $mailhops->setReverseHost(true);
 
-$map_unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','ki')))?$_GET['u']:'mi';
+$map_unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','km')))?$_GET['u']:'mi';
 $fkey     = !empty($_GET['fkey'])?$_GET['fkey']:'';
 $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 
 ?>
-<!DOCTYPE html>   
+<!DOCTYPE html>
 <html ng-app="mailHops">
 <head>
-	<meta charset="utf-8"> 
+	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<title>MailHops | Route Map</title>
 	<meta name="description" content="MailHops.com maps the hops that a message took to get to you.">
@@ -25,16 +25,16 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
   <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="/bower_components/weather-icons/css/weather-icons.min.css">
 	<link rel="stylesheet" href="dashboard.css">
-  
-	<script> 
+
+	<script>
 		var mailRoute = <?=$mailhops->getRoute()?>
 			, mapUnit = '<?=$map_unit?>'
 			, mapProvider = '<?=$map_provider?>';
-	</script>	
+	</script>
 	<script src="/node_modules/angular/angular.min.js"></script>
 </head>
 <!-- !Body -->
-<body ng-controller="mainController"> 
+<body ng-controller="mainController">
   <script type="text/ng-template" id="content.html">
        <div class="modal-header">
             <h3 class="modal-title">{{title}}</h3>
@@ -43,12 +43,12 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
         <div class="modal-body">
             <div ng-if="url=='twitter'" twitter-timeline="604321882163171328" auto-resize="true" data-tweet-limit="20">Loading tweets...<i class="fa fa-cog fa-spin fa-3x"></i></div>
             <iframe ng-if="url!='twitter'" ng-src="{{url}}" width="100%" height="100%" frameborder="0"></iframe>
-        </div>        
+        </div>
   </script>
 
 	<nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
-        <div class="navbar-header">          
+        <div class="navbar-header">
           <span class="navbar-brand"><a><img src="/images/mailhops-logo.svg" width="32"> MailHops</a></span>
         </div>
         <div>
@@ -65,11 +65,11 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
               </ul>
             </li>
 	        </ul>
-    	   </div>          
+    	   </div>
           <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a ng-click="open('','twitter','@MailHops')"><i class="fa fa-lg fa-twitter"></i></a></li>
-          </ul>          
+          </ul>
         </div>
       </div>
     </nav>
@@ -77,7 +77,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
     <div class="container-fluid">
       <div class="row">
         <div id="route" class="col-sm-4 col-md-3 sidebar">
-          <ul class="nav nav-sidebar hops">  
+          <ul class="nav nav-sidebar hops">
           	<li class="active head">
           		<a>{{route.length}} hops</a>
           	</li>
@@ -99,7 +99,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
           				<span ng-if="r.w3w" class="words" ng-click="open('',r.w3w.url,'what3words')">{{r.w3w.words.join('.')}}</span>
           			</div>
 
-          	</li>          
+          	</li>
           </ul>
       </div>
       <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
@@ -119,6 +119,6 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
   <script src="/bower_components/twitter-timeline-angularjs/src/twitter-timeline.js"></script>
-	<script src="js/app.js"></script>	
+	<script src="js/app.js"></script>
 </body>
 </html>

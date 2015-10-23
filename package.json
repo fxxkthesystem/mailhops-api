@@ -1,12 +1,12 @@
 {
   "name": "mailhops",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "An email route api",
   "main": "index.php",
   "author": "Andrew Van Tassel",
   "license": "MIT",
   "scripts" :
-    { 
+    {
       "postinstall" : "bower install;"
   },
   "dependencies": {
