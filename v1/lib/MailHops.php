@@ -3,7 +3,7 @@
  *
  * @package	mailhops
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
- * @version	1.0
+ * @version	1.2.2
  */
 
 date_default_timezone_set('America/Denver');

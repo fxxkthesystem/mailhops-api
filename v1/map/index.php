@@ -119,6 +119,6 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
   <script src="/bower_components/twitter-timeline-angularjs/src/twitter-timeline.js"></script>
-	<script src="js/app.js"></script>
+	<script src="js/app.js?v=1.2.2"></script>
 </body>
 </html>
