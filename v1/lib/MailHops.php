@@ -10,7 +10,8 @@ date_default_timezone_set('America/Denver');
 
 use GeoIp2\Database\Reader;
 
-require_once 'Net/DNSBL.php';
+if(file_exists('Net/DNSBL.php'))
+	require_once 'Net/DNSBL.php';
 
 class MailHops{
 
@@ -82,8 +83,10 @@ class MailHops{
 			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
 
 		//setup dnsbl
-		$this->dnsbl = new Net_DNSBL();
-		$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
+		if(function_exists('Net_DNSBL')){
+			$this->dnsbl = new Net_DNSBL();
+			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
+		}
 
 		if($this->config && !empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
@@ -138,6 +141,9 @@ class MailHops{
 
 		foreach($this->ips as $ip){
 
+			if(!self::isValid($ip))
+				continue;
+
 			if(!self::isPrivate($ip)){
 
 				$route = self::getLocation($ip,$hopnum);
@@ -164,7 +170,11 @@ class MailHops{
 				}
 
 				//just get the weather for the sender location
-				if(!$got_weather && $this->forecast && ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
+				if(!$got_weather
+						&& $this->forecast
+						&& isset($route['lat'])
+						&& isset($route['lng'])
+						&& ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
 					$route['weather']=$weather;
 					$got_weather=true;
 				}
@@ -261,7 +271,7 @@ class MailHops{
 			return $return;
 
 		try {
-			if($this->dnsbl->isListed($ip,false)){
+			if($this->dnsbl && $this->dnsbl->isListed($ip,false)){
 				$results = $this->dnsbl->getDetails($ip);
 				if(isset($results) && substr($results['record'],0,7)=='127.0.0')
 					$return = array('listed'=>true,'record'=>$results['record']);
@@ -441,9 +451,18 @@ class MailHops{
 			return true;
 		return false;
 	}
+	/*
+	NetRange: 240.0.0.0 - 255.255.255.255
+	CIDR: 240.0.0.0/4
+	NetName: SPECIAL-IPV4-FUTURE-USE-IANA-RESERVED
+	NetHandle: NET-240-0-0-0-0
+	Addresses starting with 240 or a higher number have not been allocated and should not be used, apart from 255.255.255.255, which is used for "limited broadcast" on a local network.
+	*/
+	public function isValid($ip){
+		return (int)substr($ip,0,strpos($ip,'.')) < 240;
+	}
 
 	public function isPrivate($ip){
-
 		return preg_match('/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/',$ip);
 	}
 

@@ -1,7 +1,7 @@
 # MailHops API
 [www.MailHops.com](http://www.mailhops.com)
 
-<img src="http://www.mailhops.com/images/logos/mailhops395.png" width="200" alt="MailHops logo" title="MailHops" align="right" />
+<img src="images/mailhops395.png" width="200" alt="MailHops logo" title="MailHops" align="right" />
 
 MailHops is an email route API. It does two things:
 
@@ -14,7 +14,7 @@ The route will contain DNSBL lookup results, hostname lookup results, what3words
 
 Get the geoip file, install composer, pear, node, npm and php 5.5 or greater
 
-```sh 
+```sh
 # get the geoip binary file from MaxMind
 $ mkdir geoip
 $ ./cron_get_geoip.sh
@@ -63,12 +63,12 @@ MaxMind updates on the first Tuesday of the month so lets run this at midnight o
 ```
 
 ## Setup map dependencies
-```sh 
+```sh
 $ npm install -g bower
 $ npm install
 ```
 
-## Options 
+## Options
 options are set in the config.json file
 
 ```sh
@@ -78,7 +78,7 @@ $ mv config.sample.json config.json
 ### MongoDB
 Add connection info in config.json
 
-```sh 
+```sh
 # install the mongo PHP driver
 $ pecl install mongo
 

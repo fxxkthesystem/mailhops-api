@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.3] - 2015-11-13
+### Fixed
+
+- Check for DNSBL function, issue with dev environment
+- Check that IP address starts with digit less than 240 (IANA-RESERVED)
+- Check for lat/lng in route for weather lookup
+
 ## [1.2.1] - 2015-09-18
 ### Changed
 - Added time zone parse for city if no city in MaxMind response
