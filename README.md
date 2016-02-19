@@ -10,7 +10,14 @@ MailHops is an email route API. It does two things:
 
 The route will contain DNSBL lookup results, hostname lookup results, what3words geo locations and the current weather of the senders location.
 
-## Install With Docker
+## Docker Run
+
+```sh
+docker pull avantassel/mailhops-api
+docker run --name mailhops -p 8080:80 avantassel/mailhops-api
+```
+
+## Docker Build Notes
 
 Install the [Docker Toolbox](https://www.docker.com/products/docker-toolbox)
 
