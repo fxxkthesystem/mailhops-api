@@ -1,6 +1,7 @@
-FROM nginx:latest
+FROM tutum/apache-php
 
 # Set Environment variables
+# These are also available in the config.sample.json
 # https://mongolab.com
 # ENV MONGO_HOST=''
 # ENV MONGO_PORT=''
@@ -16,21 +17,19 @@ RUN apt-get update && apt-get install -y curl \
                                          nodejs \
                                          npm \
                                          git \
-                                         build-essential \
-                                         php5-cli \
-                                         php5-fpm \
-                                         php5-mongo \
-                                         php5-curl \
-                                         php-pear
+                                         wget \
+                                         cron \
+                                         php5-mongo 
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 # Copy files
 COPY config.sample.json config.json
-COPY . /var/www/mailhops-api/
+RUN rm -fr /app
+COPY . /app
 
  # Install
-WORKDIR /var/www/mailhops-api
+WORKDIR /app
 RUN npm install -g npm bower
 
 # Composer
@@ -42,15 +41,13 @@ RUN npm install
 RUN bower --allow-root install -g
 RUN pear install Net_DNSBL
 
-ADD ./nginx-docker.conf /etc/nginx/conf.d/default.conf
+RUN echo "extension=mongo.so" >> /etc/php.ini
 
 # Get GeoIP file
 RUN mkdir geoip
 RUN ./cron_get_geoip.sh
 
 # Add cronjob
-RUN crontab -l | { cat; echo "0 0 *  * 3 /var/www/mailhops-api/cron_get_geoip.sh"; } | crontab -
+RUN crontab -l | { cat; echo "0 0 *  * 3 /app/cron_get_geoip.sh"; } | crontab -
 
-# Open port and start nginx
 EXPOSE 80
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
