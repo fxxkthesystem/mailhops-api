@@ -11,16 +11,19 @@ class What3Words {
 
 	private $language		= 'en';
 
-	private $client			= null;	
+	private $client			= null;
 
-	public function __construct($args=array()){		
+	public function __construct($args=array()){
 
 		//get api key
-		if(!empty($args['api_key'])){
-			$this->api_key = $args['api_key'];			
-			$this->client = new Client();
-			CacheSubscriber::attach($this->client);
-		} 
+		if(getenv('W3W_API_KEY')){
+			$this->api_key = getenv('W3W_API_KEY');
+		} else if(!empty($args['api_key'])){
+			$this->api_key = $args['api_key'];
+		}
+
+		$this->client = new Client();
+		CacheSubscriber::attach($this->client);
 
 		if(!empty($args['lang']) && in_array($args['lang'], array('en','de','es','fr','pt-BR','ru')))
 			$this->language = $args['lang']=='pt-BR'?'pt':$args['lang'];
@@ -33,11 +36,11 @@ class What3Words {
 		$fields = array('key'=>$this->api_key, 'position'=>$lat.','.$lng, 'lang'=>$this->language);
 
 		$res = $this->client->get('http://api.what3words.com/position?'.http_build_query($fields));
-		
+
 		if($res->getStatusCode() == 200)
 		{
 			$return = $res->json();
-			
+
 			if(!empty($return['words']))
 				return array('url'=>'http://w3w.co/'.implode('.', $return['words']),'words'=>$return['words']);
 		}

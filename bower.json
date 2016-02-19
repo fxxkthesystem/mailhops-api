@@ -1,6 +1,6 @@
 {
   "name": "mailhops-api",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "dependencies": {
     "Leaflet.Geodesic": "Fragger/Leaflet.Geodesic",
     "bootstrap": "angular-ui/bootstrap#~0.13.0",

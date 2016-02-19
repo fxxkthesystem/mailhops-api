@@ -2,7 +2,7 @@
 	"w3w": {"api_key":""}
 	,"forecastio": {"api_key":""}
 	,"mongodb":{
-		"host":""
+		"host":"localhost"
 		,"port":27017
 		,"user":""
 		,"pass":""

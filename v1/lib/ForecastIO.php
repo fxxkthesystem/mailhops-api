@@ -14,11 +14,14 @@ class ForecastIO {
 	public function __construct($args=array()){
 
 		//get api key
-		if(!empty($args['api_key'])){
+		if(getenv('FORECASTIO_API_KEY')){
+			$this->api_key = getenv('FORECASTIO_API_KEY');
+		} else if(!empty($args['api_key'])){
 			$this->api_key = $args['api_key'];
-			$this->client = new Client();
-			CacheSubscriber::attach($this->client);
 		}
+
+		$this->client = new Client();
+		CacheSubscriber::attach($this->client);
 
 		if(!empty($args['unit']) && $args['unit']=='km'){
 			$this->units = 'uk';
