@@ -10,7 +10,9 @@ MailHops is an email route API. It does two things:
 
 The route will contain DNSBL lookup results, hostname lookup results, what3words geo locations and the current weather of the senders location.
 
-## Docker Run
+## Install From Docker
+
+[https://hub.docker.com/r/avantassel/mailhops-api/](https://hub.docker.com/r/avantassel/mailhops-api/)
 
 ```sh
 docker pull avantassel/mailhops-api
@@ -28,24 +30,18 @@ docker build .
 docker images
 
 # run container for mailhops with php-fpm network
-docker run --name mailhops -p 8080:80 <Image Id>
+docker run --name mailhops -p 8080:80 [Image Id]
 
 # get your Docker IP
 docker-machine ip default
 
 # SSH into the container
 docker exec -t -i mailhops /bin/bash
-
-# clean up docker commands
-docker rmi -f $(docker images -qf "dangling=true")
-docker rm -f $(docker kill $(docker ps -aq))
 ```
 
-Now open your browser to http://<Docker Ip>:8080
+Now open your browser to http://[Docker Ip]:8080
 
-PHP-FPM Status: http://<Docker Ip>:8080/status
-
-## Install
+## Install From Scratch
 
 Get the geoip file, install composer, pear, node, npm and php 5.5 or greater
 
