@@ -20,15 +20,27 @@ docker build .
 # copy Image Id
 docker images
 
+# create container for php-fpm
 docker network create --driver bridge mhnetwork
 
+# run container for php-fpm
 docker run -d -p 9000 --net mhnetwork --name php-fpm php:fpm
 
-docker run --net mhnetwork --name mailhops -d -p 8080:80 <Image Id>
+# run container for mailhops with php-fpm network
+docker run --net mhnetwork --name mailhops -p 8080:80 <Image Id>
 
+# get your Docker IP
+docker-machine ip default
+
+# SSH into the container
+docker exec -t -i mailhops /bin/bash
+
+# clean up docker commands
+docker rmi $(docker images -qf "dangling=true")
+docker rm $(docker kill $(docker ps -aq))
 ```
 
-Now open your browser to http://localhost:8080
+Now open your browser to http://<Docker Ip>:8080
 
 ## Install
 

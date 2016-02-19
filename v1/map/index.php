@@ -27,9 +27,9 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 	<link rel="stylesheet" href="dashboard.css">
 
 	<script>
-		var mailRoute = <?=$mailhops->getRoute()?>
-			, mapUnit = '<?=$map_unit?>'
-			, mapProvider = '<?=$map_provider?>';
+		var mailRoute = <?php echo $mailhops->getRoute();?>
+			, mapUnit = '<?php echo $map_unit;?>'
+			, mapProvider = '<?php echo $map_provider;?>';
 	</script>
 	<script src="/node_modules/angular/angular.min.js"></script>
 </head>
@@ -53,7 +53,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
         </div>
         <div>
 	      	<ul class="nav navbar-nav">
-	        	<li class="active" ng-if="distance"><a>This message traveled {{distance | number:0}} <?=$map_unit?></a></li>
+	        	<li class="active" ng-if="distance"><a>This message traveled {{distance | number:0}} <?php echo $map_unit;?></a></li>
             <li role="presentation" class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">
                 Map Templates <span class="caret"></span>
@@ -119,6 +119,6 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
   <script src="/bower_components/twitter-timeline-angularjs/src/twitter-timeline.js"></script>
-	<script src="js/app.js?v=1.2.2"></script>
+	<script src="js/app.js?v=1.3.0"></script>
 </body>
 </html>

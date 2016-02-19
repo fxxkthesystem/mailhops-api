@@ -21,9 +21,7 @@ RUN apt-get update && apt-get install -y curl \
                                          php5-fpm \
                                          php5-mongo \
                                          php5-curl \
-                                         php-pear \
-                                         mongodb
-
+                                         php-pear
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
@@ -49,6 +47,9 @@ ADD ./nginx-docker.conf /etc/nginx/conf.d/default.conf
 # Get GeoIP file
 RUN mkdir geoip
 RUN ./cron_get_geoip.sh
+
+# Add cronjob
+RUN crontab -l | { cat; echo "0 0 *  * 3 /var/www/mailhops-api/cron_get_geoip.sh"; } | crontab -
 
 # Open port and start nginx
 EXPOSE 80
