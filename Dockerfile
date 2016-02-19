@@ -2,13 +2,13 @@ FROM nginx:latest
 
 # Set Environment variables
 # https://mongolab.com
-ENV MONGO_HOST='ds011298.mongolab.com'
-ENV MONGO_PORT='11298'
-ENV MONGO_USER='LuVt78spQ2MtHxUZWjHWuuGCoVD'
-ENV MONGO_PASS='dq84WUudevCERJgeuYvjCHzQj3J'
-ENV MONGO_DB='mailhops-local'
-ENV FORECASTIO_API_KEY=''
-ENV W3W_API_KEY=''
+# ENV MONGO_HOST=''
+# ENV MONGO_PORT=''
+# ENV MONGO_USER=''
+# ENV MONGO_PASS=''
+# ENV MONGO_DB=''
+# ENV FORECASTIO_API_KEY=''
+# ENV W3W_API_KEY=''
 
 MAINTAINER Andrew Van Tassel <andrew@andrewvantassel.com>
 
@@ -21,17 +21,18 @@ RUN apt-get update && apt-get install -y curl \
                                          php5-fpm \
                                          php5-mongo \
                                          php5-curl \
-                                         php-pear
+                                         php-pear \
+                                         mongodb
 
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 # Copy files
 COPY config.sample.json config.json
-COPY . /usr/share/nginx
+COPY . /var/www/mailhops-api/
 
  # Install
-WORKDIR /usr/share/nginx
+WORKDIR /var/www/mailhops-api
 RUN npm install -g npm bower
 
 # Composer

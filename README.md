@@ -16,7 +16,16 @@ Install the [Docker Toolbox](https://www.docker.com/products/docker-toolbox)
 
 ```sh
 docker build .
-docker run --name mailhops -d -p 8080:80 .
+
+# copy Image Id
+docker images
+
+docker network create --driver bridge mhnetwork
+
+docker run -d -p 9000 --net mhnetwork --name php-fpm php:fpm
+
+docker run --net mhnetwork --name mailhops -d -p 8080:80 <Image Id>
+
 ```
 
 Now open your browser to http://localhost:8080
