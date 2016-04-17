@@ -94,8 +94,8 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 
                   <span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}<br/></span>
 
-          				<span class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip,'whois')">{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
-          				<span ng-if="r.host" class="host" ng-click="open('','http://www.mailhops.com/whois/'+r.ip+'?from=app','whois')">{{r.host}}<br/></span>
+          				<span class="host" ng-click="open('','//www.mailhops.com/whois/'+r.ip,'whois')">{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
+          				<span ng-if="r.host" class="host" ng-click="open('','//www.mailhops.com/whois/'+r.ip+'?from=app','whois')">{{r.host}}<br/></span>
           				<span ng-if="r.w3w" class="words" ng-click="open('',r.w3w.url,'what3words')">{{r.w3w.words.join('.')}}</span>
           			</div>
 

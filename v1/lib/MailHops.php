@@ -45,7 +45,7 @@ class MailHops{
 
 	private $config				= null;
 
-	const IMAGE_URL 			= 'http://api.mailhops.com/v1/images/';
+	const IMAGE_URL 			= 'https://api.mailhops.com/v1/images/';
 
 	//path from DOCUMENT_ROOT
 	const IMAGE_DIR 			= '/v1/images/';

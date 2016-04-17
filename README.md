@@ -41,6 +41,15 @@ docker exec -t -i mailhops /bin/bash
 
 Now open your browser to http://[Docker Ip]:8080
 
+## Install From Ansible and deploy to AWS
+
+```sh
+brew install ansible
+ansible-galaxy install avantassel.php7.ansible.role geerlingguy.letsencrypt
+
+ansible-playbook -i Ansible.inventory Ansiblefile.aws.yml
+```
+
 ## Install From Scratch
 
 Get the geoip file, install composer, pear, node, npm and php 5.5 or greater

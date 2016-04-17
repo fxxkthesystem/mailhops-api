@@ -6,3 +6,5 @@ config.json
 *.log
 composer.lock
 nginx.conf
+Ansible.inventory
+.retry

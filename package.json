@@ -21,9 +21,8 @@
     "Map",
     "Live Music"
   ],
-  "scripts" :
-    {
-      "postinstall" : "bower install;"
+  "scripts": {
+    "postinstall": "bower install;"
   },
   "dependencies": {
     "angular": "^1.4.6",
@@ -32,6 +31,7 @@
     "font-awesome": "git://github.com/FortAwesome/Font-Awesome",
     "jquery": "^2.1.4",
     "leaflet": "^0.7.4",
-    "leaflet-providers": "^1.0.29"
-  }
+    "leaflet-providers": "^1.0.29",
+    "bower": "^1.7.9"
+  }  
 }
