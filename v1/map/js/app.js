@@ -1,9 +1,12 @@
-angular.module('mailHops',['leaflet-directive','ui.bootstrap','twitter.timeline','ngCookies'])
+angular.module('mailHops',
+['leaflet-directive'
+,'ui.bootstrap'
+,'twitter.timeline'
+,'ngCookies'])
 .controller('ModalInstanceCtrl', function ($scope, $sce, $modalInstance, url, title) {
 
-
   if(url == 'twitter'){
-       $scope.url = url
+       $scope.url = url;
   } else {
        $scope.url = $sce.trustAsResourceUrl(url);
   }
