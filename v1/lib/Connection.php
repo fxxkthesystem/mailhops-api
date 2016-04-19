@@ -99,8 +99,7 @@ class Connection
 		}
 		catch (MongoConnectionException $e)
 		{
-			echo $e->getMessage();
- 		 	Error::setError('Error connecting to server. '.$e->getMessage());
+			Error::setError('Error connecting to server. '.$e->getMessage());
 		}
 		catch (MongoException $e)
 		{
