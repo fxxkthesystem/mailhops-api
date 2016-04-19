@@ -41,17 +41,17 @@ class Connection
 			$this->host = $config->host;
 
 		if(getenv('MONGO_PORT'))
-			$this->host = getenv('MONGO_PORT');
+			$this->port = getenv('MONGO_PORT');
 		else if(!empty($config->port))
 			$this->port = $config->port;
 
 		if(getenv('MONGO_USER'))
-			$this->host = getenv('MONGO_USER');
+			$this->user = getenv('MONGO_USER');
 		else if(!empty($config->user))
 			$this->user = $config->user;
 
 		if(getenv('MONGO_PASS'))
-			$this->host = getenv('MONGO_PASS');
+			$this->pass = getenv('MONGO_PASS');
 		else if(!empty($config->pass))
 			$this->pass = $config->pass;
 
@@ -99,6 +99,7 @@ class Connection
 		}
 		catch (MongoConnectionException $e)
 		{
+			echo $e->getMessage();
  		 	Error::setError('Error connecting to server. '.$e->getMessage());
 		}
 		catch (MongoException $e)
