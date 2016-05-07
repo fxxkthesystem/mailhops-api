@@ -1,0 +1,28 @@
+---
+- name: Install php-fpm and deps
+  yum: name={{ item }} state=present
+  with_items:
+    - php55w
+    - php55w-fpm
+    - php55w-pdo
+    - php55w-mbstring
+    - php55w-mcrypt
+    - php55w-pear
+    - php55w
+    - php55w-pecl-apcu
+
+- name: Install Mongo
+  command: pecl install mongodb
+  notify: restart php-fpm
+
+- name: Install DNSBL
+  command: pear install Net_DNSBL
+  notify: restart php-fpm
+
+- name: Copy php-ini configuration
+  template: src=php.ini dest=/etc/
+  notify: restart php-fpm
+
+- name: Copy php-ini config
+  template: src=www.conf dest=/etc/php-fpm.d/
+  notify: restart php-fpm

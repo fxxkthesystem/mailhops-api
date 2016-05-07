@@ -1,0 +1,15 @@
+[all:vars]
+http_port=80
+https_port=443
+server_name=api.mailhops.com
+root_web_dir=/var/www/mailhops-api
+with_ssl=false
+
+[local]
+localhost   ansible_connection=local
+
+[aws]
+#aws-domain    ansible_connection=ssh ansible_user=centos
+
+[aws:vars]
+with_ssl=true

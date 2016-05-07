@@ -1,0 +1,17 @@
+---
+- name: Install nginx
+  yum: name=nginx state=present
+
+- name: Copy nginx configuration
+  template: src=mailhops-api.conf dest=/etc/nginx/conf.d/mailhops-api-ssl.conf
+  notify: restart nginx
+  when: with_ssl
+
+- name: Copy nginx configuration
+  template: src=mailhops-api.conf dest=/etc/nginx/conf.d/mailhops-api.conf
+  notify: restart nginx
+  when: not with_ssl
+
+- name: Copy nginx configuration
+  template: src=nginx.conf dest=/etc/nginx/nginx.conf
+  notify: restart nginx

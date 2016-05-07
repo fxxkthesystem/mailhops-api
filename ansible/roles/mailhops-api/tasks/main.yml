@@ -1,0 +1,61 @@
+---
+
+  - name: Install Node
+    yum: name={{item}} state=present update_cache=yes
+    with_items:
+      - nodejs
+      - npm
+      - git
+
+  - name: Update MailHops API
+    git: repo=https://github.com/avantassel/mailhops-api.git dest={{ root_web_dir }}
+
+  - name: Copy MailHops config
+    template: src=config.json dest="{{ root_web_dir }}/config.json"
+
+  - name: Get composer
+    get_url: url="https://getcomposer.org/download/{{ composer_version }}/composer.phar" dest=/usr/local/bin/composer mode=755
+
+  - name: Run composer
+    command: /usr/local/bin/composer install
+    args:
+      chdir: "{{ root_web_dir }}"
+
+  - name: Update NPM directories
+    file: path="{{ root_web_dir }}/{{ item }}" state=directory group=nginx owner=nginx
+    with_items:
+      - bower_components
+      - node_modules
+
+  - name: Run NPM
+    command: "{{ item }}"
+    args:
+      chdir: "{{ root_web_dir }}"
+    with_items:
+      - npm install
+      # - bower install
+
+  - name: Create directory
+    file: path="{{ root_web_dir }}/geoip" state=directory owner=nginx group=nginx
+
+  - name: Update GeoIP
+    command: "{{ root_web_dir }}/cron_get_geoip.sh"
+
+  - name: Install GeoIP Cron
+    cron: name="geoip update" weekday=3 job="{{ root_web_dir }}/cron_get_geoip.sh  > /dev/null"
+    when: cron_on
+
+  - name: Post Commands
+    command: "{{item}}"
+    with_items:
+      - setsebool -P httpd_can_network_connect 1
+    when: inventory_hostname != "localhost"
+
+  - name: Set NGINX perms on directory
+    file: path="{{ root_web_dir }}" state=directory owner=nginx group=nginx recurse=yes
+
+  - name: Restart Nginx and PHP-FPM
+    service: name={{ item }} state=restarted
+    with_items:
+      - php-fpm
+      - nginx

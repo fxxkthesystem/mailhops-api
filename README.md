@@ -24,7 +24,7 @@ docker run --name mailhops -p 8080:80 avantassel/mailhops-api
 Install the [Docker Toolbox](https://www.docker.com/products/docker-toolbox)
 
 ```sh
-docker build .
+docker build -t mailhops-api .
 
 # copy Image Id
 docker images
@@ -141,6 +141,14 @@ You may want to use OpenDNS if running locally, there are issues with Google DNS
 
 ```sh
 php -S 127.0.0.1:8080 -t .
+```
+
+Test your config at /v1/test.php
+
+If you get permission denied on AWS EC2 you may need to run,
+
+```sh
+sudo /usr/sbin/setsebool -P httpd_can_network_connect 1
 ```
 
 ## Plugins for Postbox and Thunderbird

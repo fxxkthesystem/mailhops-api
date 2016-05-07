@@ -1,53 +1,25 @@
-FROM tutum/apache-php
+FROM centos:centos7.2.1511
 
-# Set Environment variables
-# These are also available in the config.sample.json
-# https://mongolab.com
-# ENV MONGO_HOST=''
-# ENV MONGO_PORT=''
-# ENV MONGO_USER=''
-# ENV MONGO_PASS=''
-# ENV MONGO_DB=''
-# ENV FORECASTIO_API_KEY=''
-# ENV W3W_API_KEY=''
+RUN yum install -y \
+  git \
+  wget \
+  gcc \
+  libffi-devel \
+  python-devel \
+  openssl-devel \
+  mongodb
 
-MAINTAINER Andrew Van Tassel <andrew@andrewvantassel.com>
+RUN wget https://bootstrap.pypa.io/get-pip.py
+RUN python get-pip.py
 
-RUN apt-get update && apt-get install -y curl \
-                                         nodejs \
-                                         npm \
-                                         git \
-                                         wget \
-                                         cron \
-                                         php5-mongo 
+RUN pip install ansible
 
-RUN ln -s /usr/bin/nodejs /usr/bin/node
+RUN mkdir /var/www
 
-# Copy files
-COPY config.sample.json config.json
-RUN rm -fr /app
-COPY . /app
+#RUN git clone https://github.com/avantassel/mailhops-api.git /var/www/mailhops-api
+#RUN cd /var/www/mailhops-api && ansible-playbook -i ansible/inventory.sample ansible/mailhops.yml --extra-vars="cron_on=false"
 
- # Install
-WORKDIR /app
-RUN npm install -g npm bower
-
-# Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install
-
-# npm and bower
-RUN npm install
-RUN bower --allow-root install -g
-RUN pear install Net_DNSBL
-
-RUN echo "extension=mongo.so" >> /etc/php.ini
-
-# Get GeoIP file
-RUN mkdir geoip
-RUN ./cron_get_geoip.sh
-
-# Add cronjob
-RUN crontab -l | { cat; echo "0 0 *  * 3 /app/cron_get_geoip.sh"; } | crontab -
+COPY ansible /opt/ansible
+RUN ansible-playbook -i /opt/ansible/inventory.sample /opt/ansible/mailhops.yml --extra-vars="cron_on=false"
 
 EXPOSE 80

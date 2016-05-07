@@ -1,0 +1,9 @@
+---
+w3w_api_key: ""
+forecastio_api_key: ""
+mongo_host: "localhost"
+mongo_port: 27017
+mongo_user: ""
+mongo_pass: ""
+cron_on: true
+composer_version: 1.0.3

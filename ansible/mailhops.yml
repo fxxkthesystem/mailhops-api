@@ -1,0 +1,19 @@
+---
+
+- hosts: "{{ env }}"
+
+  become: true
+  become_user: root
+
+  vars:
+    - env: local
+
+  roles:
+    - common
+    - nginx
+    - php-fpm
+    - mailhops-api
+
+  tasks:
+    # - name: Wait for MailHops
+    #   wait_for: port={{ http_port }} delay=10
