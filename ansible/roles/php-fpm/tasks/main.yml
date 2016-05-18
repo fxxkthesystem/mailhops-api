@@ -8,16 +8,23 @@
     - php55w-mbstring
     - php55w-mcrypt
     - php55w-pear
+    - php55w-devel
     - php55w
     - php55w-pecl-apcu
 
 - name: Install Mongo
   command: pecl install mongodb
   notify: restart php-fpm
+  register: pecl_result
+  changed_when: "pecl_result.rc == 0"
+  failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
 
 - name: Install DNSBL
   command: pear install Net_DNSBL
   notify: restart php-fpm
+  register: pecl_result
+  changed_when: "pecl_result.rc == 0"
+  failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
 
 - name: Copy php-ini configuration
   template: src=php.ini dest=/etc/

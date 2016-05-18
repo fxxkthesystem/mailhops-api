@@ -1,6 +1,0 @@
----
-http_port: 80
-https_port: 443
-root_web_dir: /var/www/mailhops-api
-server_name: localhost
-with_ssl: false

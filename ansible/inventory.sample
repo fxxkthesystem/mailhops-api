@@ -1,15 +1,15 @@
 [all:vars]
-http_port=80
-https_port=443
-server_name=api.mailhops.com
-root_web_dir=/var/www/mailhops-api
+newrelic_license=""
 with_ssl=false
+mongo_host="localhost"
+mongo_port=27017
+mongo_user=""
+mongo_pass=""
 
-[local]
+[docker]
 localhost   ansible_connection=local
 
 [aws]
-#aws-domain    ansible_connection=ssh ansible_user=centos
 
 [aws:vars]
 with_ssl=true

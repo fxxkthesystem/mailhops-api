@@ -8,7 +8,7 @@
       - git
 
   - name: Update MailHops API
-    git: repo=https://github.com/avantassel/mailhops-api.git dest={{ root_web_dir }}
+    git: repo=https://github.com/avantassel/mailhops-api.git dest={{ root_web_dir }} force=yes
 
   - name: Copy MailHops config
     template: src=config.json dest="{{ root_web_dir }}/config.json"
@@ -49,7 +49,7 @@
     command: "{{item}}"
     with_items:
       - setsebool -P httpd_can_network_connect 1
-    when: inventory_hostname != "localhost"
+    when: env != "docker"
 
   - name: Set NGINX perms on directory
     file: path="{{ root_web_dir }}" state=directory owner=nginx group=nginx recurse=yes
@@ -59,3 +59,4 @@
     with_items:
       - php-fpm
       - nginx
+    when: env != "docker"

@@ -1,9 +1,9 @@
 ---
 w3w_api_key: ""
 forecastio_api_key: ""
-mongo_host: "localhost"
-mongo_port: 27017
-mongo_user: ""
-mongo_pass: ""
 cron_on: true
 composer_version: 1.0.3
+http_port: 80
+https_port: 443
+server_name: api.mailhops.com
+root_web_dir: /var/www/mailhops-api

@@ -1,7 +1,7 @@
 ---
 
 - name: Install EPEL
-  command: rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
 
 - name: Install Webtatic
-  command: rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+  yum: name=https://mirror.webtatic.com/yum/el7/webtatic-release.rpm state=present

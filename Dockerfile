@@ -19,7 +19,11 @@ RUN mkdir /var/www
 #RUN git clone https://github.com/avantassel/mailhops-api.git /var/www/mailhops-api
 #RUN cd /var/www/mailhops-api && ansible-playbook -i ansible/inventory.sample ansible/mailhops.yml --extra-vars="cron_on=false"
 
-COPY ansible /opt/ansible
-RUN ansible-playbook -i /opt/ansible/inventory.sample /opt/ansible/mailhops.yml --extra-vars="cron_on=false"
+COPY docker/startup.sh startup.sh
+
+ADD ansible /opt/ansible
+RUN ansible-playbook -i /opt/ansible/inventory.sample /opt/ansible/mailhops.yml -e "env=docker" -e "cron_on=false"
+
+CMD["startup.sh"]
 
 EXPOSE 80

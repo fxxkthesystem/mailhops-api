@@ -3,17 +3,16 @@
 - hosts: "{{ env }}"
 
   become: true
-  become_user: root
-
-  vars:
-    - env: local
 
   roles:
     - common
     - nginx
     - php-fpm
     - mailhops-api
+    - { role: newrelic, when: newrelic_license is defined and newrelic_license != "" }
 
   tasks:
-    # - name: Wait for MailHops
-    #   wait_for: port={{ http_port }} delay=10
+
+    - name: Wait for MailHops
+      wait_for: port={{ http_port }} delay=10
+      when: env != "docker"
