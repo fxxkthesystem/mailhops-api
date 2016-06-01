@@ -1,5 +1,5 @@
 ---
-  
+
   - name: Add New Relic Repo
     yum: name=http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm state=present
 
@@ -24,7 +24,11 @@
     ini_file: dest=/etc/php.d/newrelic.ini section=newrelic option="{{ item.option }}" value="\"{{ item.value }}"\"
     with_items:
       - { option: "newrelic.appname", value: "MailHops API" }
-      - { option: "newrelic.license", value: "{{newrelic_license}}" }
+      - { option: "newrelic.license", value: "{{ newrelic_license }}" }
+      - { option: "newrelic.process_host.display_name", value: "{{ inventory_hostname }}" }
+
+  - name: Copy newrelic.ini
+    copy: src=/etc/php.d/newrelic.ini dest=/etc/php-fpm.d/newrelic.ini remote_src=yes
     notify:
-      - restart nginx
-      - restart php-fpm
+     - restart nginx
+     - restart php-fpm
