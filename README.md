@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/avantassel/mailhops-api.png?label=ready&title=Ready)](https://waffle.io/avantassel/mailhops-api)
 # MailHops API
 [www.MailHops.com](http://www.mailhops.com)
 
