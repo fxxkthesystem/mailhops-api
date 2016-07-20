@@ -98,7 +98,7 @@ pecl install mongo
 vim /etc/php-5.5.ini
 
 # install default collections
-mongorestore -h [host:port] -d mailhops -u [user] -p [pass] v1/mongo/mailhops/
+mongorestore -h [host:port] -d mailhops -u [user] -p [pass] mongo/mailhops/
 ```
 
 ### what3words

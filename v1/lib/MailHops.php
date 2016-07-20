@@ -45,10 +45,10 @@ class MailHops{
 
 	private $config				= null;
 
-	const IMAGE_URL 			= 'https://api.mailhops.com/v1/images/';
+	const IMAGE_URL 			= 'https://api.mailhops.com/images/';
 
 	//path from DOCUMENT_ROOT
-	const IMAGE_DIR 			= '/v1/images/';
+	const IMAGE_DIR 			= '/images/';
 
 	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
 	const DNS_SERVER 			= '208.67.222.222';
