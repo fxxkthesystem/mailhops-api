@@ -1,15 +1,15 @@
 <?php
-
 /** DB Connection Class
  *
- * @package	mailhops
+ * @package	mailhops-api
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
- * @version	1.0
+ * @version	1.0.0
  */
+
 class Connection
 {
 	/*MongoDB Connection info for use with MailHops
-		Signup: mongolab.com
+		Signup: mlab.com
 		Download: mongorestore binary is available from http://www.mongodb.org/downloads
 		Run: mongorestore -h [host:port] -d mailhops -u [user] -p [pass] v1/mongo/mailhops/
 	*/

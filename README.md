@@ -30,7 +30,9 @@ mkdir geoip
 
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
-composer install
+
+# Should be run on both v1 and v2
+cd v1 ; composer install ; cd ../v2 ; composer install
 
 curl -O http://pear.php.net/go-pear.phar
 sudo php -d detect_unicode=0 go-pear.phar

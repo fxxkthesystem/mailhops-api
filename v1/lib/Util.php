@@ -1,12 +1,13 @@
 <?php
 /** Utility Class
  *
- * @package	mailhops
+ * @package	mailhops-api
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
- * @version	1.0
+ * @version	1.0.0
  */
+ 
 class Util {
-	
+
 	public static function toString($var){
 		return ($var && trim($var))?strval($var):'';
 	}
@@ -23,7 +24,7 @@ class Util {
 		switch(Util::toString($var)){
 			case 'true':
 			case 't':
-			case '1':	
+			case '1':
 					return true;
 			case '':
 			case 'false':
@@ -34,11 +35,11 @@ class Util {
 				return !!intval($var);
 		}
 	}
-	
+
 	public static function toCelsius($var){
 		return round((5/9) * ($var-32));
 	}
-	
+
 	public static function strCompare($str1,$str2)
 	{
 		if(strtolower(trim($str1))==strtolower(trim($str2)))
@@ -46,7 +47,7 @@ class Util {
 		else
 			return false;
 	}
-	
+
 	//Thanks to http://roshanbh.com.np/2007/12/getting-real-ip-address-in-php.html
 	public static function getRealIpAddr()
 	{
@@ -64,11 +65,11 @@ class Util {
 	    }
 	    return $ip;
 	}
-	
+
 	public static function getVersion($version){
-	
+
 		$version = end(explode(' ',$version));
-		return str_replace('.','',$version);		
-	
+		return str_replace('.','',$version);
+
 	}
 }

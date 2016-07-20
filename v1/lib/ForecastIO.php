@@ -1,4 +1,10 @@
 <?php
+/** ForecastIO Class
+ *
+ * @package	mailhops-api
+ * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
+ * @version	1.0.0
+ */
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;

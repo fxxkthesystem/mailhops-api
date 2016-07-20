@@ -1,9 +1,9 @@
 <?php
 /** MailHops API Class
  *
- * @package	mailhops
+ * @package	mailhops-api
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
- * @version	1.2.2
+ * @version	1.0.0
  */
 
 date_default_timezone_set('America/Denver');

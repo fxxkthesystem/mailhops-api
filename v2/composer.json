@@ -1,0 +1,13 @@
+{
+	"config": {
+        "vendor-dir": "vendor/"
+    },
+    "autoload": {
+    	"psr-0": {"": ["lib/"]}
+    },
+    "require": {
+		"geoip2/geoip2": "~2.0",
+		"guzzlehttp/guzzle": "~6.2.1",
+		"kevinrob/guzzle-cache-middleware": "^1.4"
+	}
+}

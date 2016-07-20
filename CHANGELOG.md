@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2016-07-19
+
+- Moved composer to v1 and v2 and must be run in each during install
+- Added InfluxDB time series storage for stats
+- Updated GuzzleHttp to 6.2.1
+- Changed Guzzle Cache to work with Guzzle 6.2.1
+
 ## [1.2.3] - 2015-11-13
 ### Fixed
 

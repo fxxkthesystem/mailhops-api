@@ -1,0 +1,81 @@
+html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; outline: 0; font-size: 100%; vertical-align: baseline; background-color: transparent; font-weight: normal; }
+body{ font-size: 62.5%; }
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block }
+nav ul { list-style: none }
+blockquote, q { quotes: none }
+blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; }
+a { margin: 0; padding: 0; font-size: 100%; vertical-align: baseline; background-color: transparent; }
+ins { background-color: #ff9; color: #000; text-decoration: none; }
+mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
+del { text-decoration: line-through }
+abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
+/* tables still need cellspacing="0" in the markup */
+table { border-collapse: collapse; border-spacing: 0; }
+hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
+input, select { vertical-align: middle }
+label, input[type=button], input[type=submit], button { cursor: pointer }
+strong{ font-weight: bold; }
+
+input[readonly] { color:#999; }
+
+/* END RESET! */
+
+/* base styles */
+body{ color:#777; background-color: #FFF; font-family: Verdana, Geneva, Tahoma, sans-serif; }
+ul{ list-style: none; }
+ol li{ margin-left: 1em; }
+
+#map{
+	width: 505px; 
+	height: 306px; 
+	position:absolute; 
+	left:215px; 
+	top:0px;
+}
+div.pop {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size:x-small;		
+	line-height: 15px;		
+	height: 100px;
+}
+
+#route{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size:x-small;
+	border-bottom: solid 1px #547093;
+	width: 210px; 
+	height: 306px; 
+	border: 1px solid #333399; 
+	background-color:#FFFFCC; 
+	position:absolute; 
+	left:0px; 
+	top:0px; 
+	overflow:auto;
+	word-wrap: break-word;
+}
+
+#route ul li{
+	padding: 5px;
+	min-height: 24px;
+	border-bottom: 1px solid #333399;
+}
+#route ul li:hover{
+	background-color: #E5E5E5;
+	cursor: pointer;
+}
+#milage{ padding: 4px;
+	height: 16px;
+	position:absolute;
+	left:0px;
+	top:307px; 
+}
+
+#infoBox{visibility: hidden; position:absolute; top:0px; left:0px; width:260px; z-index:10000; font-family:Arial; font-size:10px}
+
+#infoboxText{background-color:#fff; border: 1px solid #ccc; -moz-border-radius: 0.8em; -webkit-border-radius: 0.8em; min-height:100px; position:absolute; top:0px; left:23px; width:240px;}
+
+#infoboxTitle{position:absolute; top:10px; left:10px; width:220px;}
+
+#infoboxDescription{position:absolute; top:30px; left:10px; width:220px;}
+
+#infoboxClose{position:absolute;top:10px; right:10px;cursor:pointer}

@@ -1,6 +1,10 @@
 <?php
-
-// TODO look at implementing https://github.com/guzzle/cache-subscriber/blob/master/src/CacheStorage.php
+/** What3Words Class
+ *
+ * @package	mailhops-api
+ * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
+ * @version	1.0.0
+ */
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
