@@ -6,6 +6,4 @@ config.json
 *.log
 composer.lock
 nginx.conf
-.retry
 .DS_Store
-ansible/inventory

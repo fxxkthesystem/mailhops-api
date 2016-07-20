@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/avantassel/mailhops-api.png?label=ready&title=Ready)](https://waffle.io/avantassel/mailhops-api)
 # MailHops API
 [www.MailHops.com](http://www.mailhops.com)
 
@@ -12,43 +13,11 @@ The route will contain DNSBL lookup results, hostname lookup results, what3words
 
 ## Install From Docker
 
-[https://hub.docker.com/r/avantassel/mailhops-api/](https://hub.docker.com/r/avantassel/mailhops-api/)
+https://hub.docker.com/r/avantassel/mailhops-api
 
-```sh
-docker pull avantassel/mailhops-api
-docker run --name mailhops -p 8080:80 avantassel/mailhops-api
-```
+## Install From Ansible
 
-## Docker Build Notes
-
-Install the [Docker Toolbox](https://www.docker.com/products/docker-toolbox)
-
-```sh
-docker build -t mailhops-api .
-
-# copy Image Id
-docker images
-
-# run container for mailhops with php-fpm network
-docker run --name mailhops -p 8080:80 [Image Id]
-
-# get your Docker IP
-docker-machine ip default
-
-# SSH into the container
-docker exec -t -i mailhops /bin/bash
-```
-
-Now open your browser to http://[Docker Ip]:8080
-
-## Install From Ansible and deploy to AWS
-
-```sh
-brew install ansible
-ansible-galaxy install avantassel.php7.ansible.role geerlingguy.letsencrypt
-
-ansible-playbook -i Ansible.inventory Ansiblefile.aws.yml
-```
+https://github.com/avantassel/mailhops-api-ansible
 
 ## Install From Scratch
 

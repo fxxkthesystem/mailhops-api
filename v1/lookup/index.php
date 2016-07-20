@@ -1,7 +1,7 @@
 <?php
 
 if (!$loader = @include __DIR__ . '/../../vendor/autoload.php') {
-    die('Project dependencies missing');
+    die('Project dependencies missing.  Run composer.');
 }
 
 $maintenance = '';

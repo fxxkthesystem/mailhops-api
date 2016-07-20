@@ -1,9 +1,0 @@
----
-w3w_api_key: ""
-forecastio_api_key: ""
-cron_on: true
-composer_version: 1.0.3
-http_port: 80
-https_port: 443
-server_name: api.mailhops.com
-root_web_dir: /var/www/mailhops-api
