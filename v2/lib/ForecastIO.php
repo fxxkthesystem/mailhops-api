@@ -34,7 +34,7 @@ class ForecastIO {
 		$stack->push(new CacheMiddleware(), 'cache');
 
 		// Initialize the client with the handler option
-		$client = new Client(['handler' => $stack]);
+		$this->client = new Client(['handler' => $stack]);
 
 		if(!empty($args['unit']) && $args['unit']=='km'){
 			$this->units = 'uk';
@@ -46,11 +46,11 @@ class ForecastIO {
 		if(empty($this->api_key))
 			return '';
 
-		$res = $this->client->get('https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
+		$res = $this->client->request('GET','https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
 
 		if($res->getStatusCode() == 200)
 		{
-			$return = $res->json();
+			$return = json_encode($res->getBody());
 
 			if(!empty($return['currently']))
 				return array(

@@ -88,12 +88,12 @@ class MailHops{
 			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
 		}
 
-		if($this->config)
+		if($this->config->w3w->api_key)
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
 		if($this->config && !empty($_GET['fkey']))
 			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
-		else if($this->config)
+		else if($this->config->forecastio->api_key)
 			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
 		if($this->config && !empty($this->config->mongodb->host)){

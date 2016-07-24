@@ -34,7 +34,7 @@ class What3Words {
 		$stack->push(new CacheMiddleware(), 'cache');
 
 		// Initialize the client with the handler option
-		$client = new Client(['handler' => $stack]);
+		$this->client = new Client(['handler' => $stack]);
 
 		if(!empty($args['lang']) && in_array($args['lang'], array('en','de','es','fr','pt-BR','ru')))
 			$this->language = $args['lang']=='pt-BR'?'pt':$args['lang'];
@@ -46,11 +46,11 @@ class What3Words {
 
 		$fields = array('key'=>$this->api_key, 'position'=>$lat.','.$lng, 'lang'=>$this->language);
 
-		$res = $this->client->get('http://api.what3words.com/position?'.http_build_query($fields));
+		$res = $this->client->request('GET','http://api.what3words.com/position?'.http_build_query($fields));
 
 		if($res->getStatusCode() == 200)
 		{
-			$return = $res->json();
+			$return = json_encode($res->getBody());
 
 			if(!empty($return['words']))
 				return array('url'=>'http://w3w.co/'.implode('.', $return['words']),'words'=>$return['words']);

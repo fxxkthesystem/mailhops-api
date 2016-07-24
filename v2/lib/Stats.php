@@ -12,9 +12,9 @@ class Stats{
 
 	protected $pass = '';
 
-  protected $host = '';
+  protected $host = 'localhost';
 
-	protected $port = '8086';
+	protected $port = '4444';
 
 	protected $db 	= 'mailhops';
 
@@ -45,6 +45,52 @@ class Stats{
 		else if(!empty($config->db))
 			$this->db = $config->db;
 
+    }
+
+    public function Connect()
+  	{
+      try {
+        $client = new InfluxDB\Client($this->host, $this->port, $this->user, $this->pass);
+        $client->setDriver(new \InfluxDB\Driver\UDP($client->getHost(), $this->port));
+        if(!$client)
+          return false;
+        $database = $client->selectDB($this->db);
+        //create the db if it doesn't exist
+        if (!$database->exists()) {
+          $database->create();
+        }
+        return $database;
+      } catch(Exception $ex){
+        Error::setError($ex->getMessage());
+        return false;
+      }
+  	}
+
+    private function saveStat($hops){
+        $connection = $this->Connect();
+        if(!$connection)
+          return false;
+
+        $points = [
+            new Point(
+                'hops',
+                $hops,
+                ['host' => $_SERVER['SERVER_ADDR']],
+                null,
+                exec('date +%s%N') // this will produce a nanosecond timestamp on Linux ONLY
+            ),
+            new Point(
+                'client',
+                1,
+                ['host' => $_SERVER['SERVER_ADDR']],
+                null,
+                exec('date +%s%N') // this will produce a nanosecond timestamp on Linux ONLY
+            )
+        ];
+
+        $result = $connection->writePoints($points);
+
+        print_r($result);
     }
 }
 ?>

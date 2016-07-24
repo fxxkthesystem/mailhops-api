@@ -39,11 +39,15 @@ class MailHops{
 
 	private $connection 		= null;
 
+	private $influxdb 		= null;
+
 	private $language 			= 'en';
 
 	private $unit 				= 'mi';
 
 	private $config				= null;
+
+	private $account 		= null;
 
 	const IMAGE_URL 			= 'https://api.mailhops.com/images/';
 
@@ -88,19 +92,32 @@ class MailHops{
 			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
 		}
 
-		if($this->config)
+		//setup config
+
+		// Set W3W
+		if($this->config->w3w->api_key)
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
-		if($this->config && !empty($_GET['fkey']))
+		// Set ForecastIO
+		if(!empty($_GET['fkey']))
 			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
-		else if($this->config)
+		else if($this->config->forecastio->api_key)
 			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
-		if($this->config && !empty($this->config->mongodb->host)){
-			$this->connection = new Connection($this->config->mongodb);
-			//unset the connection of Connect fails
-			if($this->connection && !$this->connection->Connect())
-				$this->connection = null;
+		// Setup MongoDB Connection
+		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
+		//unset the connection of Connect fails
+		if($this->connection && !$this->connection->Connect())
+			$this->connection = null;
+
+		// Setup InfluxDB Connection
+		$this->influxdb = new Stats(!empty($this->config->influxdb) ? $this->config->influxdb : null);
+		//unset the influxdb of Connect fails
+		if($this->influxdb && !$this->influxdb->Connect())
+			$this->influxdb = null;
+
+		if($this->connection && !empty($_GET['api_key'])){
+			$this->account = new Account($_GET['api_key'],$this->connection);
 		}
 
 		//log the app and version, keep a daily count for stats
@@ -229,6 +246,19 @@ class MailHops{
 	$time = $time[1] + $time[0];
 	$finish = $time;
 	$total_time = round(($finish - $start), 4);
+
+	// if($this->config && !empty($this->config->routes) && $this->account){
+	// 	$this->account->saveRoute(
+	// 		array('distance'=>array(
+	// 			'miles'=>$this->total_miles
+	// 			,'kilometers'=>$this->total_kilometers)
+	// 		,'route'=>$mail_route);
+	// 	);
+	// }
+
+	if(!empty($this->influxdb)){
+		$this->influxdb->saveStat(count($mail_route));
+	}
 
 	//json_encode the route
 	return json_encode(array(
