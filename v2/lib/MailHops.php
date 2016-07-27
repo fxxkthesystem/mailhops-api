@@ -105,16 +105,20 @@ class MailHops{
 			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
 		// Setup MongoDB Connection
-		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
-		//unset the connection of Connect fails
-		if($this->connection && !$this->connection->Connect())
-			$this->connection = null;
+		if(!empty($this->config->mongodb)){
+			$this->connection = new Connection($this->config->mongodb);
+			//unset the connection of Connect fails
+			if($this->connection && !$this->connection->Connect())
+				$this->connection = null;
+		}
 
 		// Setup InfluxDB Connection
-		$this->influxdb = new Stats(!empty($this->config->influxdb) ? $this->config->influxdb : null);
-		//unset the influxdb of Connect fails
-		if($this->influxdb && !$this->influxdb->Connect())
-			$this->influxdb = null;
+		if(!empty($this->config->influxdb)){
+			$this->influxdb = new Stats($this->config->influxdb);
+			//unset the influxdb of Connect fails
+			if($this->influxdb && !$this->influxdb->Connect())
+				$this->influxdb = null;
+		}
 
 		if($this->connection && !empty($_GET['api_key'])){
 			$this->account = new Account($_GET['api_key'],$this->connection);

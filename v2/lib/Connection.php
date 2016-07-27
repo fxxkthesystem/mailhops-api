@@ -20,7 +20,7 @@ class Connection
 
 	protected $host = 'localhost';
 
-	protected $port = '27017';
+	protected $port = 27017;
 
 	protected $db 	= 'mailhops';
 

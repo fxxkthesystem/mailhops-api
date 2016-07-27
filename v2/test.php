@@ -12,18 +12,18 @@ if(file_exists(__DIR__.'/../config.json')){
   echo '<h2>W3W</h2>';
 
   if(!empty($config->w3w->api_key)){
-    echo '* W3W API key found';
+    echo 'W3W API key found';
   } else {
-    echo '* <span style="color:red">No W3W API key found</span>';
+    echo '<span style="color:red">No W3W API key found</span>';
   }
 
   echo '<br/>';
   echo '<h2>Forecast.io</h2>';
 
   if(!empty($config->forecastio->api_key)){
-    echo '* forecastio API key found';
+    echo 'forecastio API key found';
   } else {
-    echo '* <span style="color:red">No forecastio API key found</span>';
+    echo '<span style="color:red">No forecastio API key found</span>';
   }
 
   echo '<br/>';
@@ -32,9 +32,9 @@ if(file_exists(__DIR__.'/../config.json')){
     $connection = new Connection(!empty($config->mongodb) ? $config->mongodb : null);
     //unset the connection of Connect fails
     if($connection && $connection->Connect())
-      echo '* Connected!';
+      echo 'Connected!';
     else if(Error::hasError())
-        echo '* <span style="color:red">'.Error::getError().'</span>';
+        echo '<span style="color:red">'.Error::getError().'</span>';
 
     echo '<br/>';
     echo '<h2>InfluxDB</h2>';
@@ -42,9 +42,9 @@ if(file_exists(__DIR__.'/../config.json')){
     $stats = new Stats(!empty($config->influxdb) ? $config->influxdb : null);
     //unset the connection of Connect fails
     if($stats && $stats->Connect())
-      echo '* Stats DB Created!';
+      echo 'Connected!';
     else if(Error::hasError())
-        echo '* <span style="color:red">'.Error::getError().'</span>';
+        echo '<span style="color:red">'.Error::getError().'</span>';
 
 } else {
   echo '<span style="color:red">Missing config.json file</span>';
