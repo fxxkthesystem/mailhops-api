@@ -63,9 +63,7 @@ class MailHops{
 
 		$this->unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','km')))?$_GET['u']:'mi';
 
-		if(!empty($_GET['route']))
-			$this->ips = explode(',',$_GET['route']);
-		else if(!empty($_GET['r']))
+		if(!empty($_GET['r']))
 			$this->ips = explode(',',$_GET['r']);
 
 		if(!empty($_GET['l']) && in_array($_GET['l'], array('de','en','es','fr','ja','pt-BR','ru','zh-CN') ))
@@ -88,20 +86,18 @@ class MailHops{
 			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
 		}
 
-		if($this->config->w3w->api_key)
+		if(!empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
 		if($this->config && !empty($_GET['fkey']))
 			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
-		else if($this->config->forecastio->api_key)
+		else if(!empty($this->config->forecastio->api_key))
 			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
-		if($this->config && !empty($this->config->mongodb->host)){
-			$this->connection = new Connection($this->config->mongodb);
-			//unset the connection of Connect fails
-			if($this->connection && !$this->connection->Connect())
-				$this->connection = null;
-		}
+		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
+		//unset the connection of Connect fails
+		if($this->connection && !$this->connection->Connect())
+			$this->connection = null;
 
 		//log the app and version, keep a daily count for stats
 		if(!empty($app_version)){
@@ -115,7 +111,6 @@ class MailHops{
 
 	public function getRoute(){
 
-	$show_client = isset($_GET['showclient'])&&!Util::toBoolean($_GET['showclient'])?false:true;
 	$show_client = isset($_GET['c'])&&!Util::toBoolean($_GET['c'])?false:$show_client;
 	$client_ip=self::getRealIpAddr();
 	$is_mailhops_site = isset($_GET['test'])?true:false;
@@ -128,6 +123,7 @@ class MailHops{
 	$got_weather = false;
 
 	$mail_route=array();
+	$client_route=null;
 
 	//loop through IPs
 	$hopnum=1;
@@ -197,7 +193,7 @@ class MailHops{
 	}
 
 	//get current location
-	if($show_client==true && !empty($client_ip)){
+	if(!empty($client_ip)){
 
 		$route=array();
 		if(!empty($client_ip) && !self::isPrivate($client_ip)){
@@ -217,10 +213,10 @@ class MailHops{
 				$route['image']=self::IMAGE_URL.'email_end.png';
 				$route['client']=true;
 				//$route['dnsbl']=self::getDNSBL($ip);
-				$mail_route[]=$route;
+				$client_route=$route;
 			}
 		} else if(self::isPrivate($client_ip)) {
-			$mail_route[]=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
+			$client_route=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
 		}
 	}
 	//track end time
@@ -229,6 +225,11 @@ class MailHops{
 	$time = $time[1] + $time[0];
 	$finish = $time;
 	$total_time = round(($finish - $start), 4);
+
+	$this->logRoute($mail_route,$client_route);
+
+	if($show_client==true && !empty($client_route))
+		$mail_route[]=$client_route;
 
 	//json_encode the route
 	return json_encode(array(
@@ -484,6 +485,18 @@ class MailHops{
 		}
 
 		return $dist;
+	}
+
+	private function logRoute($route,$client){
+		if(!$this->connection)
+			return false;
+
+		//append the client hop
+		if(!empty($client))
+			$route[]=$client;
+
+		$collection = $this->connection->getConn()->routes;
+		$collection->insert(array('date'=>(int)date('U'),'route'=>$route));
 	}
 
 	private function logApp($version){

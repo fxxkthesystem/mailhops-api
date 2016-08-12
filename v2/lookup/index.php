@@ -22,7 +22,7 @@ if(!empty($maintenance)){
 				);
 } else{
 
-	if(!isset($_GET['route']) && !isset($_GET['r'])){
+	if(!isset($_GET['r'])){
 
 		$json_map = json_encode(array(
 				'meta'=>array(

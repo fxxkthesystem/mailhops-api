@@ -67,9 +67,7 @@ class MailHops{
 
 		$this->unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','km')))?$_GET['u']:'mi';
 
-		if(!empty($_GET['route']))
-			$this->ips = explode(',',$_GET['route']);
-		else if(!empty($_GET['r']))
+		if(!empty($_GET['r']))
 			$this->ips = explode(',',$_GET['r']);
 
 		if(!empty($_GET['l']) && in_array($_GET['l'], array('de','en','es','fr','ja','pt-BR','ru','zh-CN') ))
@@ -95,22 +93,20 @@ class MailHops{
 		//setup config
 
 		// Set W3W
-		if($this->config->w3w->api_key)
+		if(!empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
 		// Set ForecastIO
 		if(!empty($_GET['fkey']))
 			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
-		else if($this->config->forecastio->api_key)
+		else if(!empty($this->config->forecastio->api_key))
 			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
 		// Setup MongoDB Connection
-		if(!empty($this->config->mongodb)){
-			$this->connection = new Connection($this->config->mongodb);
-			//unset the connection of Connect fails
-			if($this->connection && !$this->connection->Connect())
-				$this->connection = null;
-		}
+		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
+		//unset the connection of Connect fails
+		if($this->connection && !$this->connection->Connect())
+			$this->connection = null;
 
 		// Setup InfluxDB Connection
 		if(!empty($this->config->influxdb)){
@@ -136,8 +132,8 @@ class MailHops{
 
 	public function getRoute(){
 
-	$show_client = isset($_GET['showclient'])&&!Util::toBoolean($_GET['showclient'])?false:true;
-	$show_client = isset($_GET['c'])&&!Util::toBoolean($_GET['c'])?false:$show_client;
+	$show_client = isset($_GET['c'])&&!Util::toBoolean($_GET['c'])?false:Util::toBoolean($_GET['c']);
+
 	$client_ip=self::getRealIpAddr();
 	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
@@ -149,6 +145,7 @@ class MailHops{
 	$got_weather = false;
 
 	$mail_route=array();
+	$client_route=null;
 
 	//loop through IPs
 	$hopnum=1;
@@ -218,7 +215,7 @@ class MailHops{
 	}
 
 	//get current location
-	if($show_client==true && !empty($client_ip)){
+	if(!empty($client_ip)){
 
 		$route=array();
 		if(!empty($client_ip) && !self::isPrivate($client_ip)){
@@ -238,10 +235,10 @@ class MailHops{
 				$route['image']=self::IMAGE_URL.'email_end.png';
 				$route['client']=true;
 				//$route['dnsbl']=self::getDNSBL($ip);
-				$mail_route[]=$route;
+				$client_route=$route;
 			}
 		} else if(self::isPrivate($client_ip)) {
-			$mail_route[]=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
+			$client_route=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
 		}
 	}
 	//track end time
@@ -260,9 +257,14 @@ class MailHops{
 	// 	);
 	// }
 
-	if(!empty($this->influxdb)){
-		$this->influxdb->saveStat(count($mail_route));
-	}
+	// if(!empty($this->influxdb)){
+	// 	$this->influxdb->saveStat(count($mail_route));
+	// }
+
+	$this->logRoute($mail_route,$client_route);
+
+	if($show_client==true && !empty($client_route))
+		$mail_route[]=$client_route;
 
 	//json_encode the route
 	return json_encode(array(
@@ -518,6 +520,32 @@ class MailHops{
 		}
 
 		return $dist;
+	}
+
+	private function logRoute($route,$client){
+		if(!$this->connection)
+			return false;
+
+		//append the client hop
+		if(!empty($client))
+			$route[]=$client;
+
+		$collection = $this->connection->getConn()->routes;
+		$test = $collection->insert(array('date'=>(int)date('U'),'route'=>$route));
+	}
+
+	public function getStats($since){
+		if(!$this->connection)
+			return false;
+
+		$query = array('date'=>array('$gte'=>(int)$since));
+
+		$collection = $this->connection->getConn()->routes;
+		$cursor = $collection->find($query);
+		$results = iterator_to_array($cursor,false);
+		if(!empty($results))
+			return json_encode($results[0]);
+		return json_encode($results);
 	}
 
 	private function logApp($version){

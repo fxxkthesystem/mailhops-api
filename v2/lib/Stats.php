@@ -54,7 +54,6 @@ class Stats{
 
       try {
         $client = new Client($this->host, $this->port, $this->user, $this->pass);
-        // $client->setDriver(new \InfluxDB\Driver\UDP($client->getHost(), $this->port));
         if(!$client)
           return false;
         $database = $client->selectDB($this->db);
@@ -93,9 +92,10 @@ class Stats{
         $result = $connection->writePoints($points);
 
       } catch(Exception $ex){
+
         Error::setError($ex->getMessage());
-        echo $ex->getMessage();
-      }        
+
+      }
     }
 }
 ?>

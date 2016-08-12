@@ -1,0 +1,18 @@
+body {
+  background: #f4f4f4;
+}
+
+svg {
+  display: block;
+  margin: auto;
+}
+
+.land-boundary {
+  fill: grey;
+}
+
+.state-boundary {
+  fill: none;
+  stroke: white;
+  stroke-width: 0.25;
+}

@@ -17,7 +17,7 @@ class Connection
 
 	protected $pass = '';
 
-	protected $host = '';
+	protected $host = 'localhost';
 
 	protected $port = '27017';
 

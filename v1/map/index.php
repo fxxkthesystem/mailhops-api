@@ -25,7 +25,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
   <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="/bower_components/weather-icons/css/weather-icons.min.css">
 	<link rel="stylesheet" href="dashboard.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.4/angular.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
 	<script>
 		var mailRoute = <?php echo $mailhops->getRoute();?>
 			, mapUnit = '<?php echo $map_unit;?>'
