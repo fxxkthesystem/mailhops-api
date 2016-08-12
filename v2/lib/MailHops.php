@@ -261,7 +261,7 @@ class MailHops{
 	// 	$this->influxdb->saveStat(count($mail_route));
 	// }
 
-	$this->logRoute($mail_route,$client_route);
+	$this->logTraffic($mail_route,$client_route);
 
 	if($show_client==true && !empty($client_route))
 		$mail_route[]=$client_route;
@@ -522,7 +522,7 @@ class MailHops{
 		return $dist;
 	}
 
-	private function logRoute($route,$client){
+	private function logTraffic($route,$client){
 		if(!$this->connection)
 			return false;
 
@@ -530,21 +530,19 @@ class MailHops{
 		if(!empty($client))
 			$route[]=$client;
 
-		$collection = $this->connection->getConn()->routes;
+		$collection = $this->connection->getConn()->traffic;
 		$test = $collection->insert(array('date'=>(int)date('U'),'route'=>$route));
 	}
 
-	public function getStats($since){
+	public function getTraffic($since){
 		if(!$this->connection)
 			return false;
 
 		$query = array('date'=>array('$gte'=>(int)$since));
 
-		$collection = $this->connection->getConn()->routes;
+		$collection = $this->connection->getConn()->traffic;
 		$cursor = $collection->find($query);
 		$results = iterator_to_array($cursor,false);
-		if(!empty($results))
-			return json_encode($results[0]);
 		return json_encode($results);
 	}
 

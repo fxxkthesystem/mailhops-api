@@ -6,7 +6,7 @@ function d3_draw(el) {
                   'viewBox': `0 0 ${width} ${height}`
                 });
 
-    d3.json('/data/us-map.json', function(err, topology) {
+    d3.json('/traffic/data/us-map.json', function(err, topology) {
       svg.append('path')
          .datum(topojson.feature(topology, topology.objects.land))
          .attr('d', path)
@@ -19,21 +19,21 @@ function d3_draw(el) {
     });
 };
 
-function d3_hop(el, hop) {
-    
+function d3_traffic(el, hops, coords) {
+
     let colorScale = d3.scale.linear()
-                       .domain(d3.extent(hop, c => c.ts))
+                       .domain(d3.extent(hops, c => c.ts))
                        .range([0, 0.8]);
 
     let hopSel = d3.select('svg').selectAll('circle')
-                    .data(hop, (d) => d.lat)
+                    .data(hops, (d) => d.lat)
                     .attr('fill-opacity', c => colorScale(c.ts));
 
     hopSel.enter().append('circle')
                    .attr({
                      'cx': (d) => projection([d.lng, d.lat])[0],
                      'cy': (d) => projection([d.lng, d.lat])[1]
-                   })
+                   });
 
     hopSel.attr({
              'r': 1,
@@ -76,6 +76,37 @@ function d3_hop(el, hop) {
                           .attr({
                             'fill': 'white'
                           })
-                  })
-           })
+                  });
+
+                  hopSel.enter().append("path")
+                              .datum({'type':'LineString','coordinates':coords})
+                              .attr({
+                                'class': 'arc',
+                                'r': 1,
+                                'opacity': 1e-6,
+                                'fill-opacity': 0.3,
+                                'fill': '#c4e3f3',
+                                'stroke': '#fff',
+                                'stroke-opacity': 1
+                              })
+                              .attr({'d': path})
+                              .style({
+                                'stroke': '#c4e3f3',
+                                'stroke-width': '1px'
+                              })
+                              .transition()
+                              .delay((d) => Math.floor((Math.random() * 1000) + 0))
+                              .duration(1000)
+                              .ease('cubic-in-out')
+                              .attr({
+                                   'fill': '#c4e3f3',
+                                   'opacity': 1,
+                                   'r': 60,
+                                   'stroke-opacity': 0.4,
+                                   'stroke-width': '1px',
+                                   'stroke': '#361'
+                                 })
+                              .remove();
+           });
+
 };

@@ -226,7 +226,7 @@ class MailHops{
 	$finish = $time;
 	$total_time = round(($finish - $start), 4);
 
-	$this->logRoute($mail_route,$client_route);
+	$this->logTraffic($mail_route,$client_route);
 
 	if($show_client==true && !empty($client_route))
 		$mail_route[]=$client_route;
@@ -487,7 +487,7 @@ class MailHops{
 		return $dist;
 	}
 
-	private function logRoute($route,$client){
+	private function logTraffic($route,$client){
 		if(!$this->connection)
 			return false;
 
@@ -495,7 +495,7 @@ class MailHops{
 		if(!empty($client))
 			$route[]=$client;
 
-		$collection = $this->connection->getConn()->routes;
+		$collection = $this->connection->getConn()->traffic;
 		$collection->insert(array('date'=>(int)date('U'),'route'=>$route));
 	}
 

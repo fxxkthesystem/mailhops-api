@@ -23,7 +23,7 @@ $mailhops = new MailHops();
 $since = date('U')-3;
 
 try{
-	$json_map = $mailhops->getStats($since);
+	$json_map = $mailhops->getTraffic($since);
 }
 catch(Exception $ex){
 	error_log($ex->getMessage());
