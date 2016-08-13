@@ -9,7 +9,7 @@ if(file_exists(__DIR__.'/../config.json')){
   $config = @file_get_contents(__DIR__.'/../config.json');
   $config = @json_decode($config);
 }
-
+echo '<h1>MailHops API V1</h1>';
 echo '<h2>W3W</h2>';
 
 if(!empty($config->w3w->api_key)){

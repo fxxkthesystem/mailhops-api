@@ -81,7 +81,6 @@ function d3_traffic(el, hops, coords) {
                   hopSel.enter().append("path")
                               .datum({'type':'LineString','coordinates':coords})
                               .attr({
-                                'class': 'arc',
                                 'r': 1,
                                 'opacity': 1e-6,
                                 'fill-opacity': 0.3,
@@ -106,7 +105,8 @@ function d3_traffic(el, hops, coords) {
                                    'stroke-width': '1px',
                                    'stroke': '#361'
                                  })
-                              .remove();
+                                 .remove();
+
            });
 
 };
