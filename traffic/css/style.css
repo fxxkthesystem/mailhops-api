@@ -17,8 +17,7 @@ svg {
   stroke-width: 0.25;
 }
 
-.route {
-  fill: none;
-  stroke: rgb(196, 228, 243);
-  stroke-width: 3px;
+.label.units {
+  font-size: 14px;
+  cursor: pointer;
 }

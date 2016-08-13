@@ -496,7 +496,15 @@ class MailHops{
 			$route[]=$client;
 
 		$collection = $this->connection->getConn()->traffic;
-		$collection->insert(array('date'=>(int)date('U'),'route'=>$route));
+		$test = $collection->insert(array(
+			'date'=>(int)date('U')
+			,'route'=>$route
+			,'distance'=>array(
+				'miles'=>$this->total_miles
+				,'kilometers'=>$this->total_kilometers
+				)
+			)
+		);
 	}
 
 	private function logApp($version){
