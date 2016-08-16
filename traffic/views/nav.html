@@ -1,0 +1,29 @@
+<div class="navbar navbar-default navbar-fixed-top">
+ <div class="container">
+   <div class="navbar-header">
+     <a href="/" class="navbar-brand"><img src="/images/mailhops-50.png"> MailHops API</a>
+     <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+       <span class="icon-bar"></span>
+       <span class="icon-bar"></span>
+       <span class="icon-bar"></span>
+     </button>
+   </div>
+   <div class="navbar-collapse collapse" id="navbar-main">
+     <ul class="nav navbar-nav">
+       <li ng-class="{'active':page=='us'}">
+         <a ui-sref="us">U.S.</a>
+       </li>
+       <li ng-class="{'active':page=='world'}">
+         <a ui-sref="world">World</a>
+       </li>
+     </ul>
+
+     <ul class="nav navbar-nav navbar-right">
+       <li><a href="https://mailhops.com" target="_blank">MailHops</a></li>
+       <li><a href="https://github.com/avantassel/mailhops-api" target="_blank">Github</a></li>
+       <li><a href="https://twitter.com/mailhops" target="_blank">Twitter</a></li>
+     </ul>
+
+   </div>
+ </div>
+</div>

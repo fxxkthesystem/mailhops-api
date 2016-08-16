@@ -132,7 +132,7 @@ class MailHops{
 
 	public function getRoute(){
 
-	$show_client = isset($_GET['c'])&&!Util::toBoolean($_GET['c'])?false:Util::toBoolean($_GET['c']);
+	$show_client = isset($_GET['c'])&&Util::toBoolean($_GET['c'])?true:false;
 
 	$client_ip=self::getRealIpAddr();
 	$is_mailhops_site = isset($_GET['test'])?true:false;
@@ -261,7 +261,7 @@ class MailHops{
 	// 	$this->influxdb->saveStat(count($mail_route));
 	// }
 
-	$this->logTraffic($mail_route,$client_route);
+	$this->logTraffic($mail_route,$client_route,$total_time);
 
 	if($show_client==true && !empty($client_route))
 		$mail_route[]=$client_route;
@@ -522,7 +522,7 @@ class MailHops{
 		return $dist;
 	}
 
-	private function logTraffic($route,$client){
+	private function logTraffic($route,$client,$total_time){
 		if(!$this->connection)
 			return false;
 
@@ -534,6 +534,7 @@ class MailHops{
 		$test = $collection->insert(array(
 			'date'=>(int)date('U')
 			,'route'=>$route
+			,'time'=>$total_time
 			,'distance'=>array(
 				'miles'=>$this->total_miles
 				,'kilometers'=>$this->total_kilometers

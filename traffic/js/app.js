@@ -1,22 +1,50 @@
-angular.module('mailHops',[])
-.controller('mainController', function ($scope, $filter) {
+angular.module('mailHops',['ui.router'])
+.config(function($stateProvider, $urlRouterProvider, $locationProvider, $logProvider) {
+
+  $locationProvider.html5Mode(true);
+
+  $stateProvider
+    .state('world', {
+      url: '/',
+      controller: 'mainController',
+      templateUrl: 'views/world.html'
+    })
+    .state('us', {
+      url: '/us',
+      controller: 'mainController',
+      templateUrl: 'views/us.html'
+    })
+    .state('otherwise', {
+      url: '*path',
+      templateUrl: 'views/not-found.html'
+    });
+})
+.filter('formatHost',function(){
+  return function(input){
+    if(input.indexOf('.') != -1){
+      let host = input.split('.');
+      input = host.length > 1 ? host[host.length-2]+'.'+host[host.length-1] : input;
+    }
+    return input;
+  }
+})
+.controller('mainController', function ($scope, $filter, $state) {
 
   $scope.routes = [];
   $scope.units = 'mi';
+  $scope.page = $state.current.name;
 
   var width = 960,
-      height = 500;
+      height = 600;
+  var path, projection;
 
-  var projection = d3.geo.albersUsa()
-                         .scale(1000)
-                         .translate([width / 2, height / 2]);
+  function d3_draw_US(el) {
+      projection = d3.geo.albersUsa()
+                           .scale(1000)
+                           .translate([width / 2, height / 2]);
 
-  var path = d3.geo.path()
-               .projection(projection);
+      path = d3.geo.path().projection(projection);
 
-  d3_draw(d3.select('#map'));
-
-  function d3_draw(el) {
       let svg = el.append('svg')
                   .attr({
                     'width': width,
@@ -35,6 +63,45 @@ angular.module('mailHops',[])
            .attr('d', path)
            .attr('class', 'state-boundary');
       });
+  }
+
+  function d3_draw_WORLD(el) {
+    projection = d3.geo.kavrayskiy7()
+      .scale(200)
+      .translate([width / 2, height / 2])
+      .precision(.1);
+
+    path = d3.geo.path().projection(projection);
+
+    let svg = el.append('svg')
+                  .attr({
+                    'width': width,
+                    'height': height,
+                    'viewBox': `0 0 ${width} ${height}`
+                  });
+
+      svg.append("defs").append("path")
+        .datum({type: "Sphere"})
+        .attr("id", "sphere")
+        .attr("d", path);
+
+      d3.json('/traffic/data/world-50m.json', function(error, world) {
+        if (error) throw error;
+
+        var countries = topojson.feature(world, world.objects.countries).features,
+            neighbors = topojson.neighbors(world.objects.countries.geometries);
+
+        svg.selectAll(".country")
+            .data(countries)
+          .enter().insert("path", ".graticule")
+            .attr("class", "country")
+            .attr("d", path);
+
+        svg.insert("path", ".graticule")
+            .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+            .attr("class", "boundary")
+            .attr("d", path);
+        });
   }
 
   function d3_traffic(el, hops, coords) {
@@ -129,6 +196,11 @@ angular.module('mailHops',[])
 
   }
 
+  if($scope.page == 'us')
+    d3_draw_US(d3.select('#map'));
+  else
+    d3_draw_WORLD(d3.select('#map'));
+
   if (!!window.EventSource) {
     var source = new EventSource('/v2/traffic');
     var traffic, hops, coords, route;
@@ -143,10 +215,14 @@ angular.module('mailHops',[])
             id: e.lastEventId,
             number: route.length,
             distance: hops.distance,
+            time: hops.time,
             date: $filter('date')(new Date(e.lastEventId*1000),'medium'),
+            host: !!route[0].host ? route[0].host : '',
             firstHop: route[0],
             lastHop: route[route.length-1]
           });
+          if($scope.routes.length > 10)
+            $scope.routes.shift();
           $scope.$apply();
           coords = route.map(function(h){
             return [h.lng, h.lat];

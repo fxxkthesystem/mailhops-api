@@ -5,8 +5,8 @@ if (!$loader = @include __DIR__ . '/../vendor/autoload.php') {
 }
 
 header("Access-Control-Allow-Origin: *");
-header('Content-Type: text/event-stream');
-header('Cache-Control: no-cache');
+header("Content-Type: text/event-stream");
+header("Cache-Control: no-cache");
 
 function sendMsg($id, $msg) {
   echo "id: $id\n";

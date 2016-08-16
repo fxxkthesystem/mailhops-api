@@ -21,3 +21,36 @@ svg {
   font-size: 14px;
   cursor: pointer;
 }
+
+.navbar-brand>img {
+    margin-top: -15px;
+    vertical-align: -18px;
+    display: inline-block;
+}
+
+.stroke {
+  fill: none;
+  stroke: #000;
+  stroke-width: 3px;
+}
+
+.fill {
+  fill: #fff;
+}
+
+.graticule {
+  fill: none;
+  stroke: #777;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+}
+
+.country {
+  fill: grey;
+}
+
+.boundary {
+  fill: none;
+  stroke: white;
+  stroke-width: 0.25;
+}
