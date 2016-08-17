@@ -413,7 +413,8 @@ class MailHops{
 
 	private function parseCityFromTimeZone($timeZone){
 		if(isset($timeZone)){
-			$city = end(explode('/', $timeZone));
+			$end = explode('/', $timeZone);
+			$city = end($end);
 			return str_replace('_', ' ', $city);
 		}
 		return '';

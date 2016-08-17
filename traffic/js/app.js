@@ -33,6 +33,7 @@ angular.module('mailHops',['ui.router'])
   $scope.routes = [];
   $scope.units = 'mi';
   $scope.page = $state.current.name;
+  $scope.event_source;
 
   var width = 960,
       height = 600;
@@ -201,36 +202,54 @@ angular.module('mailHops',['ui.router'])
   else
     d3_draw_WORLD(d3.select('#map'));
 
-  if (!!window.EventSource) {
-    var source = new EventSource('/v2/traffic');
-    var traffic, hops, coords, route;
-    source.addEventListener('message', function(e) {
-      traffic = JSON.parse(e.data);
-      if(!!traffic){
-        _.each(traffic,function(hops){
-          route = hops.route.filter(function(h){
-            return (!!h.lat && !!h.lng);
+  $scope.startMonitor = function(){
+    //don't start more than once
+    if(!!$scope.event_source && $scope.event_source.readyState<=1)
+      return;
+
+    if (!!window.EventSource && !$state.event_source) {
+      $scope.event_source = new EventSource('/v2/traffic');
+      var traffic, hops, coords, route;
+      $scope.event_source.addEventListener('message', function(e) {
+        traffic = JSON.parse(e.data);
+        if(!!traffic){
+          _.each(traffic,function(hops){
+            route = hops.route.filter(function(h){
+              return (!!h.lat && !!h.lng);
+            });
+            $scope.routes.push({
+              id: e.lastEventId,
+              number: route.length,
+              distance: hops.distance,
+              time: hops.time,
+              date: $filter('date')(new Date(e.lastEventId*1000),'medium'),
+              host: !!route[0].host ? route[0].host : '',
+              firstHop: route[0],
+              lastHop: route[route.length-1]
+            });
+            if($scope.routes.length > 10)
+              $scope.routes.shift();
+            $scope.$apply();
+            coords = route.map(function(h){
+              return [h.lng, h.lat];
+            });
+            d3_traffic(d3.select('#map'), route, coords);
           });
-          $scope.routes.push({
-            id: e.lastEventId,
-            number: route.length,
-            distance: hops.distance,
-            time: hops.time,
-            date: $filter('date')(new Date(e.lastEventId*1000),'medium'),
-            host: !!route[0].host ? route[0].host : '',
-            firstHop: route[0],
-            lastHop: route[route.length-1]
-          });
-          if($scope.routes.length > 10)
-            $scope.routes.shift();
-          $scope.$apply();
-          coords = route.map(function(h){
-            return [h.lng, h.lat];
-          });
-          d3_traffic(d3.select('#map'), route, coords);
-        });
-      }
-    }, false);
-  }
+        }
+      }, false);
+
+      $scope.event_source.addEventListener('error', function(e) {
+        $state.error=e;
+      }, false);
+    }
+  };
+
+  $scope.stopMonitor = function(){
+    if(!!$scope.event_source && $scope.event_source.readyState<=1)
+      $scope.event_source.close();
+  };
+
+  // Start the monitor
+  $scope.startMonitor();
 
 });

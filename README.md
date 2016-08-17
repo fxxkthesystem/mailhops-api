@@ -2,7 +2,7 @@
 # MailHops API
 [www.MailHops.com](http://www.mailhops.com)
 
-<img src="images/mailhops395.png" width="200" alt="MailHops logo" title="MailHops" align="right" />
+<img src="https://www.mailhops.com/images/logos/logo.png" alt="MailHops logo" title="MailHops" align="right" />
 
 MailHops is an email route API. It does two things:
 

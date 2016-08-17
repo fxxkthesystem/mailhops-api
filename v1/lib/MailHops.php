@@ -84,7 +84,7 @@ class MailHops{
 		if(function_exists('Net_DNSBL')){
 			$this->dnsbl = new Net_DNSBL();
 			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
-		}
+		} 
 
 		if(!empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
@@ -378,7 +378,8 @@ class MailHops{
 
 	private function parseCityFromTimeZone($timeZone){
 		if(isset($timeZone)){
-			$city = end(explode('/', $timeZone));
+			$end = explode('/', $timeZone);
+			$city = end($end);
 			return str_replace('_', ' ', $city);
 		}
 		return '';

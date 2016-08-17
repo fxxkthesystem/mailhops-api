@@ -1,5 +1,20 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
 body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
   background: #f4f4f4;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+  text-align: center;
 }
 
 svg {
@@ -53,4 +68,23 @@ svg {
   fill: none;
   stroke: white;
   stroke-width: 0.25;
+}
+
+.fa-stop-circle{
+  color: grey;
+  cursor: pointer;
+}
+
+.fa-stop-circle.on{
+  color: rgba(200,47,47,1);
+  cursor: pointer;
+}
+
+.fa-play-circle{
+  color: grey;
+  cursor: pointer;
+}
+.fa-play-circle.on{
+  color: rgba(73,163,127,1);
+  cursor: pointer;
 }
