@@ -85,13 +85,13 @@ class Connection
 		try
 		{
 			if(!empty($this->user) && !empty($this->pass))
-				$link = new MongoClient("mongodb://".$this->user.":".$this->pass."@".$this->host.':'.$this->port.'/'.$this->db);
+				$link = new MongoDB\Client("mongodb://".$this->user.":".$this->pass."@".$this->host.':'.$this->port.'/'.$this->db);
 			else
-				$link = new MongoClient("mongodb://".$this->host.':'.$this->port.'/'.$this->db);
+				$link = new MongoDB\Client("mongodb://".$this->host.':'.$this->port.'/'.$this->db);
 
 			if(!empty($link)){
 				$this->link=$link;
-				$this->conn=$link->selectDB($this->db);
+				$this->conn=$link->selectDatabase($this->db);
 				return true;
 			}
 			else

@@ -211,6 +211,8 @@ angular.module('mailHops',['ui.router'])
       $scope.event_source = new EventSource('/v2/traffic');
       var traffic, hops, coords, route;
       $scope.event_source.addEventListener('message', function(e) {
+        if(!e.data)
+          return;
         traffic = JSON.parse(e.data);
         if(!!traffic){
           _.each(traffic,function(hops){

@@ -116,8 +116,11 @@ class MailHops{
 				$this->influxdb = null;
 		}
 
-		if($this->connection && !empty($_GET['api_key'])){
-			$this->account = new Account($_GET['api_key'],$this->connection);
+		//setup account if valid api key
+		if(!empty($_GET['api_key'])){
+			$this->account = new Account();
+			if(!$this->account->isValidAPIKey($_GET['api_key']));
+				$this->account = null;
 		}
 
 		//log the app and version, keep a daily count for stats
@@ -132,8 +135,7 @@ class MailHops{
 
 	public function getRoute(){
 
-	$show_client = isset($_GET['c'])&&Util::toBoolean($_GET['c'])?true:false;
-
+	$show_client = !isset($_GET['c'])?true:Util::toBoolean($_GET['c']);
 	$client_ip=self::getRealIpAddr();
 	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
@@ -248,14 +250,18 @@ class MailHops{
 	$finish = $time;
 	$total_time = round(($finish - $start), 4);
 
-	// if($this->config && !empty($this->config->routes) && $this->account){
-	// 	$this->account->saveRoute(
-	// 		array('distance'=>array(
-	// 			'miles'=>$this->total_miles
-	// 			,'kilometers'=>$this->total_kilometers)
-	// 		,'route'=>$mail_route);
-	// 	);
-	// }
+	if($this->account){
+		$this->account->saveRoute(array(
+			'date'=>(int)date('U')
+			,'route'=>!empty($client_route) ? $mail_route.push($client_route) : $mail_route
+			,'time'=>$total_time
+			,'distance'=>array(
+				'miles'=>$this->total_miles
+				,'kilometers'=>$this->total_kilometers
+				)
+			)
+		);
+	}
 
 	// if(!empty($this->influxdb)){
 	// 	$this->influxdb->saveStat(count($mail_route));
@@ -532,7 +538,7 @@ class MailHops{
 			$route[]=$client;
 
 		$collection = $this->connection->getConn()->traffic;
-		$test = $collection->insert(array(
+		$collection->insertOne(array(
 			'date'=>(int)date('U')
 			,'route'=>$route
 			,'time'=>$total_time
@@ -561,7 +567,7 @@ class MailHops{
 			return false;
 
 		$collection = $this->connection->getConn()->stats;
-		$collection->update(array('version'=>$version,'day'=>(int)date('Ymd'))
+		$collection->updateOne(array('version'=>$version,'day'=>(int)date('Ymd'))
 			,array('$inc'=>array("count"=>1)
 					,'$set'=>array('day'=>(int)date('Ymd')))
 			,array('upsert'=>true,'w'=>0,'multiple'=>false));
@@ -574,7 +580,7 @@ class MailHops{
 
 		$field = $origin==1?"origin_count":"count";
 		$collection = $this->connection->getConn()->countries;
-		$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
+		$collection->updateOne(array('iso'=>new MongoDB\BSON\Regex('/^'.$country_code.'$','i'))
 			,array('$inc'=>array("$field"=>1))
 			,array('upsert'=>false,'w'=>0,'multiple'=>false));
 	}
@@ -585,7 +591,7 @@ class MailHops{
 
 		$field = $origin==1?"origin_count":"count";
 		$collection = $this->connection->getConn()->states;
-		$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
+		$collection->updateOne(array('abbr'=>new MongoDB\BSON\Regex('/^'.$state_abbr.'$','i'))
 			,array('$inc'=>array("$field"=>1))
 			,array('upsert'=>false,'w'=>0,'multiple'=>false));
 	}
@@ -596,7 +602,7 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->countries;
-		$cursor = $collection->find(array('name'=>new MongoRegex('/^'.$country.'$/i')),array('iso'=>1))->limit(1);
+		$cursor = $collection->find(array('name'=>new MongoDB\BSON\Regex('/^'.$country.'$','i')),array('iso'=>1))->limit(1);
 		$results = iterator_to_array($cursor,false);
 
 		if(Error::hasError() || empty($results[0]['iso']))
@@ -612,7 +618,7 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->countries;
-		$cursor = $collection->find(array('iso'=>new MongoRegex('/^'.$iso.'$/i')),array('printable_name'=>1))->limit(1);
+		$cursor = $collection->find(array('iso'=>new MongoDB\BSON\Regex('/^'.$iso.'$','i')),array('printable_name'=>1))->limit(1);
 		$results = iterator_to_array($cursor,false);
 
 		if(Error::hasError() || empty($results[0]['printable_name']))
@@ -628,7 +634,7 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->states;
-		$cursor = $collection->find(array('abbr'=>new MongoRegex('/^'.$state.'$/i')),array('name'=>1))->limit(1);
+		$cursor = $collection->find(array('abbr'=>new MongoDB\BSON\Regex('/^'.$state.'$','i')),array('name'=>1))->limit(1);
 		$results = iterator_to_array($cursor,false);
 
 		if(Error::hasError() || empty($results[0]['name']))

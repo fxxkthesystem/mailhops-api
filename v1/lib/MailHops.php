@@ -84,7 +84,7 @@ class MailHops{
 		if(function_exists('Net_DNSBL')){
 			$this->dnsbl = new Net_DNSBL();
 			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
-		} 
+		}
 
 		if(!empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
@@ -111,7 +111,7 @@ class MailHops{
 
 	public function getRoute(){
 
-	$show_client = isset($_GET['c'])&&Util::toBoolean($_GET['c'])?true:false;
+	$show_client = !isset($_GET['c'])?true:Util::toBoolean($_GET['c']);
 	$client_ip=self::getRealIpAddr();
 	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
@@ -497,7 +497,7 @@ class MailHops{
 			$route[]=$client;
 
 		$collection = $this->connection->getConn()->traffic;
-		$test = $collection->insert(array(
+		$test = $collection->insertOne(array(
 			'date'=>(int)date('U')
 			,'route'=>$route
 			,'time'=>$total_time
@@ -514,7 +514,7 @@ class MailHops{
 			return false;
 
 		$collection = $this->connection->getConn()->stats;
-		$collection->update(array('version'=>$version,'day'=>(int)date('Ymd'))
+		$collection->updateOne(array('version'=>$version,'day'=>(int)date('Ymd'))
 			,array('$inc'=>array("count"=>1)
 					,'$set'=>array('day'=>(int)date('Ymd')))
 			,array('upsert'=>true,'w'=>0,'multiple'=>false));
@@ -527,7 +527,7 @@ class MailHops{
 
 		$field = $origin==1?"origin_count":"count";
 		$collection = $this->connection->getConn()->countries;
-		$collection->update(array('iso'=>new MongoRegex('/^'.$country_code.'$/i'))
+		$collection->updateOne(array('iso'=>new MongoDB\BSON\Regex('/^'.$country_code.'$','i'))
 			,array('$inc'=>array("$field"=>1))
 			,array('upsert'=>false,'w'=>0,'multiple'=>false));
 	}
@@ -538,7 +538,7 @@ class MailHops{
 
 		$field = $origin==1?"origin_count":"count";
 		$collection = $this->connection->getConn()->states;
-		$collection->update(array('abbr'=>new MongoRegex('/^'.$state_abbr.'$/i'))
+		$collection->updateOne(array('abbr'=>new MongoDB\BSON\Regex('/^'.$state_abbr.'$','i'))
 			,array('$inc'=>array("$field"=>1))
 			,array('upsert'=>false,'w'=>0,'multiple'=>false));
 	}
@@ -549,7 +549,7 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->countries;
-		$cursor = $collection->find(array('name'=>new MongoRegex('/^'.$country.'$/i')),array('iso'=>1))->limit(1);
+		$cursor = $collection->find(array('name'=>new MongoDB\BSON\Regex('/^'.$country.'$','i')),array('iso'=>1))->limit(1);
 		$results = iterator_to_array($cursor,false);
 
 		if(Error::hasError() || empty($results[0]['iso']))
@@ -565,7 +565,7 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->countries;
-		$cursor = $collection->find(array('iso'=>new MongoRegex('/^'.$iso.'$/i')),array('printable_name'=>1))->limit(1);
+		$cursor = $collection->find(array('iso'=>new MongoDB\BSON\Regex('/^'.$iso.'$','i')),array('printable_name'=>1))->limit(1);
 		$results = iterator_to_array($cursor,false);
 
 		if(Error::hasError() || empty($results[0]['printable_name']))
@@ -581,7 +581,7 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->states;
-		$cursor = $collection->find(array('abbr'=>new MongoRegex('/^'.$state.'$/i')),array('name'=>1))->limit(1);
+		$cursor = $collection->find(array('abbr'=>new MongoDB\BSON\Regex('/^'.$state.'$','i')),array('name'=>1))->limit(1);
 		$results = iterator_to_array($cursor,false);
 
 		if(Error::hasError() || empty($results[0]['name']))
