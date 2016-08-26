@@ -216,7 +216,7 @@ angular.module('mailHops',['ui.router'])
         traffic = JSON.parse(e.data);
         if(!!traffic){
           _.each(traffic,function(hops){
-            route = hops.route.filter(function(h){
+            route = _.filter(hops.route, function(h){
               return (!!h.lat && !!h.lng);
             });
             $scope.routes.push({
