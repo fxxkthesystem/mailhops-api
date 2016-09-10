@@ -1,7 +1,7 @@
 {
   "name": "mailhops-api",
-  "version": "1.3.0",
-  "description": "An email route API",
+  "version": "2.0.0",
+  "description": "An email routing API",
   "main": "index.php",
   "author": "Andrew Van Tassel",
   "license": "MIT",
@@ -14,12 +14,10 @@
   },
   "homepage": "https://github.com/avantassel/mailhops-api#readme",
   "keywords": [
-    "Concerts",
-    "Bands",
-    "Tour",
-    "Music",
-    "Map",
-    "Live Music"
+    "email",
+    "geoip",
+    "route",
+    "map"
   ],
   "scripts": {
     "postinstall": "bower install;"

@@ -6,8 +6,6 @@
  * @version	1.0.0
  */
 
-date_default_timezone_set('America/Denver');
-
 use GeoIp2\Database\Reader;
 
 if(file_exists('Net/DNSBL.php'))
@@ -44,6 +42,8 @@ class MailHops{
 	private $unit 				= 'mi';
 
 	private $config				= null;
+
+	private $google			= null;
 
 	const IMAGE_URL 			= 'https://api.mailhops.com/images/';
 
@@ -86,6 +86,9 @@ class MailHops{
 			$this->dnsbl->setBlacklists(array('zen.spamhaus.org'));
 		}
 
+		//init google
+		$this->google = new Google;
+
 		if(!empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
@@ -96,7 +99,7 @@ class MailHops{
 
 		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
 		//unset the connection of Connect fails
-		if($this->connection && !$this->connection->Connect())
+		if(!$this->connection->Connect())
 			$this->connection = null;
 
 		//log the app and version, keep a daily count for stats
@@ -324,34 +327,27 @@ class MailHops{
 		PostalCode: 75080
 		Country: US
 	*/
-	public function getWhoIs($ip,$format=true)
+	public function getWhoIs($loc_array)
 	{
-		$return = array();
-
-		exec('whois -h whois.arin.net n '.$ip, $output);
+		exec('whois -h whois.arin.net n '.$loc_array['ip'], $output);
 		if(!empty($output)){
 			for($i=0;$i<count($output);$i++){
 
-			if(strstr($output[$i],'descr:') && empty($return['descr']))
-				$return['descr']=trim(str_replace('descr:','',$output[$i]));
+				if(empty($loc_array['countryCode']) && strstr($output[$i],'Country:'))
+					$loc_array['countryCode']=trim(str_replace('Country:','',$output[$i]));
 
-			if(strstr($output[$i],'netname:'))
-				$return['netname']=trim(str_replace('netname:','',$output[$i]));
+				if(empty($loc_array['city']) && strstr($output[$i],'City:'))
+					$loc_array['city']=trim(str_replace('City:','',$output[$i]));
 
-			if(strstr($output[$i],'abuse-mailbox:'))
-				$return['abuse-mailbox']=trim(str_replace('abuse-mailbox:','',$output[$i]));
+				if(empty($loc_array['state']) && strstr($output[$i],'StateProv:'))
+					$loc_array['state']=trim(str_replace('StateProv:','',$output[$i]));
 
-			if(strstr($output[$i],'country:'))
-				$return['countryCode']=trim(str_replace('country:','',$output[$i]));
+				if(empty($loc_array['zip']) && strstr($output[$i],'PostalCode:'))
+					$loc_array['zip']=trim(str_replace('PostalCode:','',$output[$i]));
 
-			if(strstr($output[$i],'phone:') && strstr($output[$i-1],'address:'))
-				$return['countryName']=trim(str_replace('address:','',$output[$i-1]));
 			}
 		}
-		if($format)
-			return $return;
-		else
-			return $output;
+		return $loc_array;
 	}
 
 	private function getLocation($ip,$hopnum)
@@ -393,11 +389,8 @@ class MailHops{
 		if(!$this->gi || self::isPrivate($ip))
 			return $loc_array;
 
-		if(!empty($ip) && $this->gi)
-		{
-			$location = $this->gi->city($ip);
-
-			try{
+		try {
+				$location = $this->gi->city($ip);
 				if(!empty($location)){
 
 					$loc_array=array('ip'=>"$ip"
@@ -412,28 +405,43 @@ class MailHops{
 									,'countryCode'=>!empty($location->country->isoCode)?$location->country->isoCode:''
 									,'w3w'=>($this->w3w)?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
 								);
+					}
+			} catch(Exception $ex) {
+				// IP not found, continue and check whois
+				// error_log($ex->getMessage());
+			}
 
-					if(!empty($this->last_location)){
-						if($this->last_location['city']!=$loc_array['city']){
-							$distance = self::getDistance($this->last_location,$loc_array);
-							if(!empty($distance)){
-								$this->total_kilometers += $distance;
-								$this->total_miles += ($distance/1.609344);
-							}
-							$loc_array['distance']=array('from'=>array('hopnum'=>($hopnum-1)),'miles'=>!empty($distance)?($distance/1.609344):0,'kilometers'=>$distance);
-						} else {
-							$loc_array['distance']=array('from'=>array('hopnum'=>($hopnum-1)),'miles'=>0,'kilometers'=>0);
+			//get city from whois
+			if(empty($loc_array['countryCode']) || empty($loc_array['city']))
+				$loc_array = self::getWhoIs($loc_array);
+
+			//get ip from google
+			if(!empty($loc_array['countryCode'])
+				&& !empty($loc_array['city'])
+				&& empty($loc_array['lat'])
+				&& empty($loc_array['lng'])){
+					$loc_array = $this->google->GeoCode($loc_array);
+			}
+
+			//get distance from last location
+			if(!empty($this->last_location)
+				&& !empty($loc_array['city'])
+				&& !empty($loc_array['lat'])
+				&& !empty($loc_array['lng'])){
+					if($this->last_location['city']!=$loc_array['city']){
+						$distance = self::getDistance($this->last_location,$loc_array);
+						if(!empty($distance)){
+							$this->total_kilometers += $distance;
+							$this->total_miles += ($distance/1.609344);
 						}
+						$loc_array['distance']=array('from'=>array('hopnum'=>($hopnum-1)),'miles'=>!empty($distance)?($distance/1.609344):0,'kilometers'=>$distance);
+					} else {
+						$loc_array['distance']=array('from'=>array('hopnum'=>($hopnum-1)),'miles'=>0,'kilometers'=>0);
 					}
 					$this->last_location=$loc_array;
-				}
+			} else if(!empty($loc_array['lat']) && !empty($loc_array['lng'])){
+				$this->last_location=$loc_array;
 			}
-			catch(Exception $ex)
-			{
-				error_log($ex->getMessage());
-			}
-		}
-
 		return $loc_array;
 	}
 
@@ -497,7 +505,7 @@ class MailHops{
 			$route[]=$client;
 
 		$collection = $this->connection->getConn()->traffic;
-		$test = $collection->insertOne(array(
+		$collection->insertOne(array(
 			'date'=>(int)date('U')
 			,'route'=>$route
 			,'time'=>$total_time
@@ -517,17 +525,20 @@ class MailHops{
 		$collection->updateOne(array('version'=>$version,'day'=>(int)date('Ymd'))
 			,array('$inc'=>array("count"=>1)
 					,'$set'=>array('day'=>(int)date('Ymd')))
-			,array('upsert'=>true,'w'=>0,'multiple'=>false));
-
+			,array('upsert'=>true,'w'=>0,'multiple'=>false));	
 	}
 
-	private function logCountry($country_code,$origin){
+	private function logCountry($iso,$origin){
 		if(!$this->connection)
 			return false;
 
 		$field = $origin==1?"origin_count":"count";
 		$collection = $this->connection->getConn()->countries;
-		$collection->updateOne(array('iso'=>new MongoDB\BSON\Regex('/^'.$country_code.'$','i'))
+		$query = array('iso'=>strtoupper($iso));
+		if(strlen($iso)==3)
+			$query = array('iso3'=>strtoupper($iso));
+
+		$collection->updateOne($query
 			,array('$inc'=>array("$field"=>1))
 			,array('upsert'=>false,'w'=>0,'multiple'=>false));
 	}
@@ -538,7 +549,7 @@ class MailHops{
 
 		$field = $origin==1?"origin_count":"count";
 		$collection = $this->connection->getConn()->states;
-		$collection->updateOne(array('abbr'=>new MongoDB\BSON\Regex('/^'.$state_abbr.'$','i'))
+		$collection->updateOne(array('abbr'=>strtoupper($state_abbr))
 			,array('$inc'=>array("$field"=>1))
 			,array('upsert'=>false,'w'=>0,'multiple'=>false));
 	}
@@ -549,13 +560,12 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->countries;
-		$cursor = $collection->find(array('name'=>new MongoDB\BSON\Regex('/^'.$country.'$','i')),array('iso'=>1))->limit(1);
-		$results = iterator_to_array($cursor,false);
+		$countryCode = $collection->findOne(array('name'=>strtoupper($country)),array('iso'=>1));
 
-		if(Error::hasError() || empty($results[0]['iso']))
+		if(Error::hasError() || empty($countryCode->iso))
 			return false;
 		else{
-			return true;
+			return $countryCode->iso;
 		}
 	}
 
@@ -565,29 +575,30 @@ class MailHops{
 
 		$results = array();
 		$collection = $this->connection->getConn()->countries;
-		$cursor = $collection->find(array('iso'=>new MongoDB\BSON\Regex('/^'.$iso.'$','i')),array('printable_name'=>1))->limit(1);
-		$results = iterator_to_array($cursor,false);
+		$query = array('iso'=>strtoupper($iso));
+		if(strlen($iso)==3)
+			$query = array('iso3'=>strtoupper($iso));
+		$countryName = $collection->findOne($query,array('printable_name'=>1));
 
-		if(Error::hasError() || empty($results[0]['printable_name']))
+		if(Error::hasError() || empty($countryName->printable_name))
 			return false;
 		else{
-			return $results[0]['printable_name'];
+			return $countryName->printable_name;
 		}
 	}
 
-	private function isUnitedStates($state){
+	private function isUnitedStates($state_abbr){
 		if(!$this->connection)
 			return false;
 
 		$results = array();
 		$collection = $this->connection->getConn()->states;
-		$cursor = $collection->find(array('abbr'=>new MongoDB\BSON\Regex('/^'.$state.'$','i')),array('name'=>1))->limit(1);
-		$results = iterator_to_array($cursor,false);
+		$stateName = $collection->findOne(array('abbr'=>strtoupper($state_abbr)),array('name'=>1));
 
-		if(Error::hasError() || empty($results[0]['name']))
+		if(empty($stateName->name))
 			return false;
 		else{
-			return true;
+			return $stateName->name;
 		}
 	}
 }

@@ -5,17 +5,18 @@
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
  * @version	1.0.0
  */
- 
+
 class Error
 {
 
 	private static $error=null;
 
 	public static function setError($error,$concat_errors=false){
-	if($concat_errors && !empty(self::$error))
-		self::$error.="\n".$error;
-	else
-		self::$error=$error;
+
+    if($concat_errors && !empty(self::$error))
+  		self::$error.="\n".$error;
+  	else
+  		self::$error=$error;
 	}
 
 	public static function getError(){

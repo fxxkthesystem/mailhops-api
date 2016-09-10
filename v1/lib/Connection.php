@@ -17,23 +17,31 @@ class Connection
 
 	protected $pass = '';
 
-	protected $host = 'localhost';
+	protected $host = '';
 
 	protected $port = '27017';
 
 	protected $db 	= 'mailhops';
 
+	protected $connectionString = '';
+
 	/*
 	 * General Connection settings
 	 */
 
-	protected $link;
+	protected $link = null;
 
-	protected $conn;
+	protected $conn = null;
 
 	protected $debug = false;
 
 	public function __construct($config){
+
+		// this takes precendence
+		if(getenv('MONGO_CONNECTION'))
+			$this->connectionString = getenv('MONGO_CONNECTION');
+		else if(!empty($config->connectionString))
+			$this->connectionString = $config->connectionString;
 
 		if(getenv('MONGO_HOST'))
 			$this->host = getenv('MONGO_HOST');
@@ -78,18 +86,20 @@ class Connection
 
 	public function Connect()
 	{
-		$error='';
-		if(empty($this->host))
-			return false;
+		if(!empty($this->conn))
+			return true;
 
 		try
 		{
-			if(!empty($this->user) && !empty($this->pass))
+			if(!empty($this->connectionString) && !empty($this->connectionString))
+				$link = new MongoDB\Client($this->connectionString);
+			else if(!empty($this->user) && !empty($this->pass))
 				$link = new MongoDB\Client("mongodb://".$this->user.":".$this->pass."@".$this->host.':'.$this->port.'/'.$this->db);
 			else
 				$link = new MongoDB\Client("mongodb://".$this->host.':'.$this->port.'/'.$this->db);
 
 			if(!empty($link)){
+				$link->listDatabases();//test the connection
 				$this->link=$link;
 				$this->conn=$link->selectDatabase($this->db);
 				return true;
@@ -97,13 +107,13 @@ class Connection
 			else
 				return false;
 		}
-		catch (MongoConnectionException $e)
+		catch (MongoDB\Driver\Exception\ConnectionTimeoutException $e)
 		{
 			Error::setError('Error connecting to server. '.$e->getMessage());
 		}
-		catch (MongoException $e)
+		catch (MongoDB\Driver\Exception\Exception $e)
 		{
-		  	Error::setError('Error: ' . $e->getMessage());
+		  Error::setError('Error: ' . $e->getMessage());
 		}
 
 		return false;

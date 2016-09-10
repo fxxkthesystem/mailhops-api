@@ -46,14 +46,18 @@ class What3Words {
 
 		$fields = array('key'=>$this->api_key, 'position'=>$lat.','.$lng, 'lang'=>$this->language);
 
-		$res = $this->client->request('GET','http://api.what3words.com/position?'.http_build_query($fields));
+		try {
+			$res = $this->client->request('GET','http://api.what3words.com/position?'.http_build_query($fields));
 
-		if($res->getStatusCode() == 200)
-		{
-			$return = json_encode($res->getBody());
+			if($res->getStatusCode() == 200)
+			{
+				$return = json_encode($res->getBody());
 
-			if(!empty($return['words']))
-				return array('url'=>'http://w3w.co/'.implode('.', $return['words']),'words'=>$return['words']);
+				if(!empty($return['words']))
+					return array('url'=>'http://w3w.co/'.implode('.', $return['words']),'words'=>$return['words']);
+			}
+		} catch(GuzzleHttp\Exception\ClientException $ex){
+			Error::setError('What3Words Error.  Please verify or remove your What3Words API Key.');
 		}
 		return '';
 	}

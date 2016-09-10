@@ -5,7 +5,7 @@
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
  * @version	1.0.0
  */
- 
+
 class Util {
 
 	public static function toString($var){
@@ -72,4 +72,16 @@ class Util {
 		return str_replace('.','',$version);
 
 	}
+
+  public static function curlData($url) {
+		$ch = curl_init();
+		$timeout = 5;
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+		$data = curl_exec($ch);
+		curl_close($ch);
+		return $data;
+	}
+
 }

@@ -49,7 +49,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 	<nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <span class="navbar-brand"><a><img src="/images/mailhops-logo.svg" width="32"> MailHops</a></span>
+          <span class="navbar-brand"><a><img src="/images/mailhops-32.png" width="32"> MailHops</a></span>
         </div>
         <div>
 	      	<ul class="nav navbar-nav">

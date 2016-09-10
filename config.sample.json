@@ -1,11 +1,7 @@
 {
 	"w3w": {"api_key":""}
 	,"forecastio": {"api_key":""}
-	,"mongodb":{
-		"host":"localhost"
-		,"port":27017
-		,"user":""
-		,"pass":""
-		,"db":"mailhops"
+	,"mongodb": {
+		"connectionString":"mongodb://localhost:27017/mailhops"
 	}
 }

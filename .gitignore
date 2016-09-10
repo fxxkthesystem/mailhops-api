@@ -1,9 +1,8 @@
 geoip
 vendor
+accounts
 node_modules
 bower_components
 config.json
-*.log
 composer.lock
-nginx.conf
 .DS_Store

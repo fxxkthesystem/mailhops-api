@@ -7,12 +7,17 @@ angular.module('mailHops',['ui.router'])
     .state('world', {
       url: '/',
       controller: 'mainController',
-      templateUrl: 'views/world.html'
+      templateUrl: 'views/main.html'
     })
     .state('us', {
       url: '/us',
       controller: 'mainController',
-      templateUrl: 'views/us.html'
+      templateUrl: 'views/main.html'
+    })
+    .state('map', {
+      url: '/map',
+      controller: 'mainController',
+      templateUrl: 'views/map.html'
     })
     .state('otherwise', {
       url: '*path',
