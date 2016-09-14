@@ -57,7 +57,7 @@ class What3Words {
 					return array('url'=>'http://w3w.co/'.implode('.', $return['words']),'words'=>$return['words']);
 			}
 		} catch(GuzzleHttp\Exception\ClientException $ex){
-			Error::setError('What3Words Error.  Please verify or remove your What3Words API Key.');
+			MError::setError('What3Words Error.  Please verify or remove your What3Words API Key.');
 		}
 		return '';
 	}

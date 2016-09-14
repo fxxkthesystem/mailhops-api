@@ -62,7 +62,7 @@ class ForecastIO {
 						);
 			}
 		} catch(GuzzleHttp\Exception\ClientException $ex){
-			Error::setError('ForecastIO Error.  Please verify or remove your ForecastIO API Key.');
+			MError::setError('ForecastIO Error.  Please verify or remove your ForecastIO API Key.');
 		}
 		return '';
 	}

@@ -7,12 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/avantassel/mailhops-api.git"
+    "url": "git+https://github.com/mailhops/mailhops-api.git"
   },
   "bugs": {
-    "url": "https://github.com/avantassel/mailhops-api/issues"
+    "url": "https://github.com/mailhops/mailhops-api/issues"
   },
-  "homepage": "https://github.com/avantassel/mailhops-api#readme",
+  "homepage": "https://github.com/mailhops/mailhops-api#readme",
   "keywords": [
     "email",
     "geoip",

@@ -4,7 +4,10 @@ if (!$loader = @include __DIR__ . '/../vendor/autoload.php') {
     die('Project dependencies missing.  Run composer.');
 }
 
-if(isset($_SERVER['HTTP_REFERER']) && strstr($_SERVER['HTTP_REFERER'],'mailhops.com')){
+if(isset($_SERVER['HTTP_REFERER']) &&
+  (strstr($_SERVER['HTTP_REFERER'],'mailhops.com') ||
+    strstr($_SERVER['HTTP_REFERER'],'localhost:8081')
+  )){
   header("Access-Control-Allow-Origin: ".$_SERVER['HTTP_REFERER']);
   header("Content-Type: text/event-stream");
   header("Cache-Control: no-cache");

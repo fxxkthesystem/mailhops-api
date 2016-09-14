@@ -39,19 +39,23 @@ class ForecastIO {
 		if(empty($this->api_key))
 			return '';
 
-		$res = $this->client->get('https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
+		try {
+			$res = $this->client->request('GET','https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
 
-		if($res->getStatusCode() == 200)
-		{
-			$return = $res->json();
+			if($res->getStatusCode() == 200)
+			{
+				$return = json_encode($res->getBody());
 
-			if(!empty($return['currently']))
-				return array(
-						'time'=>$return['currently']['time']
-						,'icon'=>$return['currently']['icon']
-						,'summary'=>$return['currently']['summary']
-						,'temp'=>$return['currently']['temperature']
-					);
+				if(!empty($return['currently']))
+					return array(
+							'time'=>$return['currently']['time']
+							,'icon'=>$return['currently']['icon']
+							,'summary'=>$return['currently']['summary']
+							,'temp'=>$return['currently']['temperature']
+						);
+			}
+		} catch(GuzzleHttp\Exception\ClientException $ex){
+			MError::setError('ForecastIO Error.  Please verify or remove your ForecastIO API Key.');
 		}
 		return '';
 	}

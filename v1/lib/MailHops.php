@@ -525,7 +525,7 @@ class MailHops{
 		$collection->updateOne(array('version'=>$version,'day'=>(int)date('Ymd'))
 			,array('$inc'=>array("count"=>1)
 					,'$set'=>array('day'=>(int)date('Ymd')))
-			,array('upsert'=>true,'w'=>0,'multiple'=>false));	
+			,array('upsert'=>true,'w'=>0,'multiple'=>false));
 	}
 
 	private function logCountry($iso,$origin){
@@ -562,11 +562,10 @@ class MailHops{
 		$collection = $this->connection->getConn()->countries;
 		$countryCode = $collection->findOne(array('name'=>strtoupper($country)),array('iso'=>1));
 
-		if(Error::hasError() || empty($countryCode->iso))
+		if(empty($countryCode->iso))
 			return false;
-		else{
+		else
 			return $countryCode->iso;
-		}
 	}
 
 	private function getCountryName($iso){
@@ -580,11 +579,10 @@ class MailHops{
 			$query = array('iso3'=>strtoupper($iso));
 		$countryName = $collection->findOne($query,array('printable_name'=>1));
 
-		if(Error::hasError() || empty($countryName->printable_name))
+		if(empty($countryName->printable_name))
 			return false;
-		else{
+		else
 			return $countryName->printable_name;
-		}
 	}
 
 	private function isUnitedStates($state_abbr){

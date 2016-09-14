@@ -6,7 +6,7 @@
  * @version	1.0.0
  */
 
-class Error
+class MError
 {
 
 	private static $error=null;

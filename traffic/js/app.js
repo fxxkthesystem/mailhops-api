@@ -207,10 +207,18 @@ angular.module('mailHops',['ui.router'])
   else
     d3_draw_WORLD(d3.select('#map'));
 
+  $scope.monitor = function(){
+    if(!!$scope.event_source){
+      if($scope.event_source.readyState==2)
+        $scope.startMonitor();
+      else
+        $scope.stopMonitor();
+    } else if(!$state.event_source){
+      $scope.startMonitor();
+    }
+  };
+
   $scope.startMonitor = function(){
-    //don't start more than once
-    if(!!$scope.event_source && $scope.event_source.readyState<=1)
-      return;
 
     if (!!window.EventSource && !$state.event_source) {
       $scope.event_source = new EventSource('/v2/traffic');
@@ -252,11 +260,10 @@ angular.module('mailHops',['ui.router'])
   };
 
   $scope.stopMonitor = function(){
-    if(!!$scope.event_source && $scope.event_source.readyState<=1)
-      $scope.event_source.close();
+    $scope.event_source.close();
   };
 
   // Start the monitor
-  $scope.startMonitor();
+  $scope.monitor();
 
 });

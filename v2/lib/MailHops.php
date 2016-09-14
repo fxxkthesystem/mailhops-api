@@ -241,10 +241,6 @@ class MailHops{
 	$finish = $time;
 	$total_time = round(($finish - $start), 4);
 
-	// if(!empty($this->influxdb)){
-	// 	$this->influxdb->saveStat(count($mail_route));
-	// }
-
 	$this->logTraffic($mail_route,$client_route,$total_time);
 
 	if($show_client==true && !empty($client_route))
@@ -607,9 +603,8 @@ class MailHops{
 
 		if(empty($countryCode->iso))
 			return false;
-		else{
+		else
 			return $countryCode->iso;
-		}
 	}
 
 	private function getCountryName($iso){
@@ -626,9 +621,8 @@ class MailHops{
 
 		if(empty($countryName->printable_name))
 			return false;
-		else{
+		else
 			return $countryName->printable_name;
-		}
 	}
 
 	private function isUnitedStates($state_abbr){

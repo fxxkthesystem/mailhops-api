@@ -37,14 +37,4 @@ echo '<h2>MongoDB</h2>';
   else if(Error::hasError())
       echo '<span style="color:red">'.Error::getError().'</span>';
 
-  echo '<br/>';
-  echo '<h2>InfluxDB</h2>';
-
-  $stats = new Stats(!empty($config->influxdb) ? $config->influxdb : null);
-  //unset the connection of Connect fails
-  if($stats && $stats->Connect())
-    echo 'Connected!';
-  else if(Error::hasError())
-      echo '<span style="color:red">'.Error::getError().'</span>';
-
-?>
+  ?>

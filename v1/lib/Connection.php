@@ -109,11 +109,11 @@ class Connection
 		}
 		catch (MongoDB\Driver\Exception\ConnectionTimeoutException $e)
 		{
-			Error::setError('Error connecting to server. '.$e->getMessage());
+			error_log('Error connecting to server. '.$e->getMessage());
 		}
 		catch (MongoDB\Driver\Exception\Exception $e)
 		{
-		  Error::setError('Error: ' . $e->getMessage());
+			error_log('Error: ' . $e->getMessage());
 		}
 
 		return false;

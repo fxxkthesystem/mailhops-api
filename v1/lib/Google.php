@@ -15,7 +15,7 @@ class Google {
     $json_response = json_decode($res);
 
     if(!empty($json_response->error_message)){
-			Error::setError(array('from'=>'Google Geocode','msg'=>$json_response->error_message));
+			MError::setError(array('from'=>'Google Geocode','msg'=>$json_response->error_message));
 			return $loc_array;
 		}
 		return self::GeoCodeFormatted($json_response,$loc_array);
@@ -34,7 +34,7 @@ class Google {
 			}
 
 		} else if(!empty($json_response->error_message)){
-			Error::setError(array('from'=>'Google Geocode','msg'=>$json_response->error_message));
+			MError::setError(array('from'=>'Google Geocode','msg'=>$json_response->error_message));
 		}
 		return $loc_array;
 	}
