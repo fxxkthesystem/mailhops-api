@@ -1,6 +1,7 @@
 {
 	"w3w": {"api_key":""}
 	,"forecastio": {"api_key":""}
+	,"cachetio":{"url":"https://your-cachetio-domain.com","api_key":""}
 	,"mongodb": {
 		"connectionString":"mongodb://localhost:27017/mailhops"
 	}

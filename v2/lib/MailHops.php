@@ -33,6 +33,8 @@ class MailHops{
 
 	private $reverse_host		= true;
 
+	private $client_ip				= null;
+
 	private $gi 				= null;
 
 	private $gi6 				= null;
@@ -55,7 +57,7 @@ class MailHops{
 
 	protected $account 		= null;
 
-	public function __construct(){
+	public function __construct($account=null){
 
 		if(file_exists(__DIR__.'/../../config.json')){
 			//read config file
@@ -70,17 +72,17 @@ class MailHops{
 		if($this->connection && !$this->connection->Connect())
 			$this->connection = null;
 
-		//setup account if valid api key
-		$this->account = new Account();
-		if(!empty($_GET['api_key'])){
-			$this->account->isValidAPIKey($_GET['api_key']);
-		}
+		$this->client_ip = Util::getRealIpAddr();
+
+		//setup account
+		$this->account = $account;
+
 		//init google
 		$this->google = new Google;
 
 		//setup geoip
-		if(file_exists(__DIR__."/../../geoip/GeoLite2-City.mmdb"))
-			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
+		if(file_exists(str_replace('/v2/lib','',__DIR__)."/geoip/GeoLite2-City.mmdb"))
+			$this->gi = new Reader(str_replace('/v2/lib','',__DIR__)."/geoip/GeoLite2-City.mmdb");
 
 		//setup dnsbl
 		if(function_exists('Net_DNSBL')){
@@ -127,7 +129,6 @@ class MailHops{
 	public function getRoute(){
 
 	$show_client = !isset($_GET['c'])?true:Util::toBoolean($_GET['c']);
-	$client_ip=self::getRealIpAddr();
 	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
 	//track start time
@@ -208,11 +209,11 @@ class MailHops{
 	}
 
 	//get current location
-	if(!empty($client_ip)){
+	if(!empty($this->client_ip)){
 
 		$route=array();
-		if(!empty($client_ip) && !self::isPrivate($client_ip)){
-			$route = self::getLocation($client_ip,$hopnum);
+		if(!empty($this->client_ip) && !self::isPrivate($this->client_ip)){
+			$route = self::getLocation($this->client_ip,$hopnum);
 
 			if(!empty($route)){
 				if(!empty($route['countryCode'])){
@@ -221,17 +222,16 @@ class MailHops{
 					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
-				$hostname=self::getRHost($client_ip);
+				$hostname=self::getRHost($this->client_ip);
 				if(!empty($hostname))
 					$route['host']=$hostname;
 				$route['hopnum']=$hopnum;
 				$route['image']=self::IMAGE_URL.'email_end.png';
 				$route['client']=true;
-				//$route['dnsbl']=self::getDNSBL($ip);
 				$client_route=$route;
 			}
-		} else if(self::isPrivate($client_ip)) {
-			$client_route=array('ip'=>$client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
+		} else if(self::isPrivate($this->client_ip)) {
+			$client_route=array('ip'=>$this->client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
 		}
 	}
 	//track end time
@@ -258,24 +258,6 @@ class MailHops{
 				,'kilometers'=>$this->total_kilometers)
 			,'route'=>$mail_route))
 		);
-	}
-
-	//used to get the final hop
-	public function getRealIpAddr()
-	{
-	    if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-	    {
-	      $ip=$_SERVER['HTTP_CLIENT_IP'];
-	    }
-	    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-	    {
-	      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-	    }
-	    else
-	    {
-	      $ip=$_SERVER['REMOTE_ADDR'];
-	    }
-	    return $ip;
 	}
 
 	// TODO support IPV6
@@ -527,7 +509,7 @@ class MailHops{
 		$collection = $this->connection->getConn()->traffic;
 		$collection->insertOne($query);
 
-		if($this->account->getUserId()){
+		if($this->account && $this->account->getUserId()){
 			$query['userId']=new MongoDB\BSON\ObjectID($this->account->getUserId());
 			$collection = $this->connection->getConn()->user_traffic;
 			$collection->insertOne($query);
@@ -546,14 +528,6 @@ class MailHops{
 		if(!empty($cursor))
 			return $cursor->toArray();
 		return [];
-	}
-
-	public function clearTraffic(){
-		if(!$this->connection)
-			return false;
-
-		$result = $this->connection->getConn()->traffic->drop();
-		return $result;
 	}
 
 	private function logApp($version){

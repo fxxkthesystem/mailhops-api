@@ -82,4 +82,5 @@ class Util {
 		curl_close($ch);
 		return $data;
 	}
+
 }

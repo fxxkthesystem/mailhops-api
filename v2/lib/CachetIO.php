@@ -1,0 +1,220 @@
+<?php
+/** Cachet Class
+ *
+ * @package	mailhops-api
+ * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
+ * @version	2.0.0
+ */
+
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use Kevinrob\GuzzleCache\CacheMiddleware;
+
+class CachetIO {
+
+  private $connection        = null;
+
+  private $config				     = null;
+
+  private $startMetricId     = 0;
+
+  public function __construct($account=null){
+
+		if(file_exists(__DIR__.'/../../config.json')){
+			//read config file
+			$config = @file_get_contents(__DIR__.'/../../config.json');
+			$this->config = @json_decode($config);
+		}
+
+    // Setup MongoDB Connection
+		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
+		//unset the connection of Connect fails
+		if($this->connection && !$this->connection->Connect())
+			$this->connection = null;
+
+    // set metric id
+    self::getMetricId();
+  }
+
+  // this is run as part of the setup
+  public function setupMetrics(){
+    if(!$this->connection || empty($this->config->cachetio->url))
+      return;
+    $metrics = [
+      ['name' => 'Emails'
+        ,'description' => 'Total emails'
+        ,'suffix' => 'emails'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 0]
+      ,['name' => 'Total Hops'
+        ,'description' => 'Total hops per email'
+        ,'suffix' => 'hops'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 0]
+      ,['name' => 'Average Hops'
+        ,'description' => 'Average hops per email'
+        ,'suffix' => 'hops'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 1]
+      ,['name' => 'Total Miles'
+        ,'description' => 'Total miles traveled'
+        ,'suffix' => 'mi'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 0]
+      ,['name' => 'Average Miles'
+        ,'description' => 'Average miles traveled'
+        ,'suffix' => 'mi'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 1]
+      ,['name' => 'Total Kilometers'
+        ,'description' => 'Total kilometers traveled'
+        ,'suffix' => 'km'
+        ,'default_value' => 0
+        ,'display_chart' => 0
+        ,'calc_type' => 0]
+      ,['name' => 'Average Kilometers'
+        ,'description' => 'Average kilometers traveled'
+        ,'suffix' => 'km'
+        ,'default_value' => 0
+        ,'display_chart' => 0
+        ,'calc_type' => 1]
+      ,['name' => 'Average Response Time'
+        ,'description' => 'Average response time'
+        ,'suffix' => 'seconds'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 1]
+    ];
+    $client = new Client();
+
+    try {
+      foreach($metrics as $metric){
+        $client->request('POST',$this->config->cachetio->url.'/api/v1/metrics',[
+          'headers' => [
+            'X-Cachet-Token' => $this->config->cachetio->api_key
+          ]
+          ,'form_params' => [
+              'name' => $metric['name']
+              ,'description' => $metric['description']
+              ,'suffix' => $metric['suffix']
+              ,'default_value' => $metric['default_value']
+          ]
+        ]);
+      }
+    } catch(GuzzleHttp\Exception\ClientException $ex){
+      MError::setError('CachetIO Error.  Please verify or remove your CachetIO settings.');
+    }
+  }
+
+  public function getMetricId(){
+    $client = new Client();
+
+      $res = $client->request('GET',$this->config->cachetio->url.'/api/v1/metrics',[
+          'X-Cachet-Token' => $this->config->cachetio->api_key
+      ]);
+
+      if($res->getStatusCode() == 200)
+      {
+        $return = $res->getBody();
+        $contents = json_decode($return->getContents());
+        // if no metrics yet then create them
+        if(empty($contents->meta->pagination->total)){
+          self::setupMetrics();
+        } else if(!empty($contents->data[0]->id)){
+          // otherwise set the first metric id
+          $this->startMetricId = $contents->data[0]->id;
+        }
+      }
+  }
+
+  public function createMetricPoint($metric_id,$value){
+    $client = new Client();
+
+    try {
+      $res = $client->request('POST',$this->config->cachetio->url.'/api/v1/metrics/'.$metric_id.'/points',[
+        'headers' => [
+          'X-Cachet-Token' => $this->config->cachetio->api_key
+        ]
+        ,'form_params' => [
+          'id' => $metric_id
+          ,'value' => $value
+          ,'timestamp' => date('U')
+        ]
+      ]);
+
+      if($res->getStatusCode() == 200)
+      {
+        $return = json_encode($res->getBody());
+      }
+
+    } catch(GuzzleHttp\Exception\ClientException $ex){
+      MError::setError('CachetIO Error.  Please verify or remove your CachetIO settings.');
+    }
+  }
+
+  public function getMetrics(){
+
+    if(!$this->connection || empty($this->config->cachetio->url) || empty($this->startMetricId))
+      return false;
+
+    // get metrics from this date
+    $date = date('U');
+
+    $other_totals = $this->connection->getConn()->traffic->aggregate([
+      ['$match' => ['date' => ['$lte' => (int)$date]]]
+      ,['$project' => [
+          'miles' => '$distance.miles'
+          ,'kilometers' => '$distance.kilometers'
+          ,'hops' => '$route'
+          ,'time' => '$time'
+        ]
+      ]
+      ,['$group' => [
+          '_id' => '$item'
+          ,'total_mi' => ['$sum' => '$miles']
+          ,'avg_mi' => ['$avg' => '$miles']
+          ,'total_km' => ['$sum' => '$kilometers']
+          ,'avg_km' => ['$avg' => '$kilometers']
+          ,'total_hops' => ['$sum' => ['$size'=>'$hops']]
+          ,'avg_hops' => ['$avg' => ['$size'=>'$hops']]
+          ,'total_emails' => ['$sum' => 1]
+          ,'avg_time' => ['$avg' => '$time']
+        ]
+      ]
+    ]);
+
+    $metrics = $other_totals->toArray();
+
+    // don't continue if there are no metrics
+    if(empty($metrics)){
+      MError::setError('No traffic found to create metrics.');
+      return;
+    }
+
+    // post metrics from this date
+    self::createMetricPoint($this->startMetricId,$metrics[0]['total_emails']);
+    self::createMetricPoint($this->startMetricId+1,$metrics[0]['total_hops']);
+    self::createMetricPoint($this->startMetricId+2,$metrics[0]['avg_hops']);
+    self::createMetricPoint($this->startMetricId+3,$metrics[0]['total_mi']);
+    self::createMetricPoint($this->startMetricId+4,$metrics[0]['avg_mi']);
+    self::createMetricPoint($this->startMetricId+5,$metrics[0]['total_km']);
+    self::createMetricPoint($this->startMetricId+6,$metrics[0]['avg_km']);
+    self::createMetricPoint($this->startMetricId+7,$metrics[0]['avg_time']);
+
+    // clear metrics from this date
+    self::clearMetrics($date);
+  }
+
+  public function clearMetrics($date){
+		if(!$this->connection)
+			return false;
+
+		$this->connection->getConn()->traffic->deleteMany(['date' => ['$lte' => (int)$date]]);
+	}
+}
+?>

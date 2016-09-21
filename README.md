@@ -10,6 +10,8 @@ MailHops is an email route API. It does a few things:
 1. Returns a map an email took based on the Received header IP addresses
 1. Shows the weather of the sender when you provide a Forecastio API key
 1. Performs DNSBL check on messages
+1. Displays realtime traffic to the API
+1. Post metrics to [Cachethq](https://cachethq.io/) Status page
 
 The route will contain DNSBL lookup results, hostname lookup results, what3words geo locations and the current weather of the senders location.
 
