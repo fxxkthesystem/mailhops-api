@@ -31,6 +31,8 @@ class MailHops{
 
 	private $total_kilometers	= 0;
 
+	private $trip_time_milliseconds = 0;
+
 	private $reverse_host		= true;
 
 	private $client_ip				= null;
@@ -81,8 +83,8 @@ class MailHops{
 		$this->google = new Google;
 
 		//setup geoip
-		if(file_exists(str_replace('/v2/lib','',__DIR__)."/geoip/GeoLite2-City.mmdb"))
-			$this->gi = new Reader(str_replace('/v2/lib','',__DIR__)."/geoip/GeoLite2-City.mmdb");
+		if(file_exists(__DIR__."/../../geoip/GeoLite2-City.mmdb"))
+			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
 
 		//setup dnsbl
 		if(function_exists('Net_DNSBL')){
@@ -101,6 +103,7 @@ class MailHops{
 
 		$this->total_miles=0;
 		$this->total_kilometers=0;
+		$this->trip_time_milliseconds = (!empty($_GET['t']) && is_numeric($_GET['t'])) ? (int)$_GET['t'] : 0;
 
 		$app_version = isset($_GET['app'])?$_GET['app']:'';
 		if(empty($app_version))
@@ -256,6 +259,7 @@ class MailHops{
 			'distance'=>array(
 				'miles'=>$this->total_miles
 				,'kilometers'=>$this->total_kilometers)
+				,'milliseconds'=>$this->trip_time_milliseconds
 			,'route'=>$mail_route))
 		);
 	}
@@ -503,6 +507,7 @@ class MailHops{
 									,'distance'=>array(
 										'miles'=>$this->total_miles
 										,'kilometers'=>$this->total_kilometers
+										,'milliseconds'=>$this->trip_time_milliseconds
 									)
 			);
 

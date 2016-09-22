@@ -66,7 +66,7 @@ class CachetIO {
         ,'display_chart' => 1
         ,'calc_type' => 0]
       ,['name' => 'Average Miles'
-        ,'description' => 'Average miles traveled'
+        ,'description' => 'Average miles traveled per email'
         ,'suffix' => 'mi'
         ,'default_value' => 0
         ,'display_chart' => 1
@@ -78,7 +78,7 @@ class CachetIO {
         ,'display_chart' => 0
         ,'calc_type' => 0]
       ,['name' => 'Average Kilometers'
-        ,'description' => 'Average kilometers traveled'
+        ,'description' => 'Average kilometers traveled per email'
         ,'suffix' => 'km'
         ,'default_value' => 0
         ,'display_chart' => 0
@@ -86,6 +86,30 @@ class CachetIO {
       ,['name' => 'Average Response Time'
         ,'description' => 'Average response time'
         ,'suffix' => 'seconds'
+        ,'default_value' => 0
+        ,'display_chart' => 1
+        ,'calc_type' => 1]
+      ,['name' => 'Total Trip Time'
+        ,'description' => 'Total trip time per email'
+        ,'suffix' => 'trip'
+        ,'default_value' => 0
+        ,'display_chart' => 0
+        ,'calc_type' => 1]
+      ,['name' => 'Average Trip Time'
+        ,'description' => 'Average trip time per email'
+        ,'suffix' => 'trip'
+        ,'default_value' => 0
+        ,'display_chart' => 0
+        ,'calc_type' => 1]
+      ,['name' => 'Total Trip Time Under 10 seconds'
+        ,'description' => 'Total trip time per email under 10 seconds'
+        ,'suffix' => 'trip'
+        ,'default_value' => 0
+        ,'display_chart' => 0
+        ,'calc_type' => 1]
+      ,['name' => 'Average Trip Time Under 10 seconds'
+        ,'description' => 'Average trip time per email under 10 seconds'
+        ,'suffix' => 'trip'
         ,'default_value' => 0
         ,'display_chart' => 1
         ,'calc_type' => 1]
@@ -133,6 +157,7 @@ class CachetIO {
   }
 
   public function createMetricPoint($metric_id,$value){
+
     $client = new Client();
 
     try {
@@ -170,8 +195,10 @@ class CachetIO {
       ,['$project' => [
           'miles' => '$distance.miles'
           ,'kilometers' => '$distance.kilometers'
+          ,'milliseconds' => '$distance.milliseconds'
+          ,'millisecondsLte10k' => ['$cond' => [['$lte' => ['$distance.milliseconds',10000]],'$distance.milliseconds',0]]
           ,'hops' => '$route'
-          ,'time' => '$time'
+          ,'response_time' => '$time'
         ]
       ]
       ,['$group' => [
@@ -183,7 +210,11 @@ class CachetIO {
           ,'total_hops' => ['$sum' => ['$size'=>'$hops']]
           ,'avg_hops' => ['$avg' => ['$size'=>'$hops']]
           ,'total_emails' => ['$sum' => 1]
-          ,'avg_time' => ['$avg' => '$time']
+          ,'avg_response_time' => ['$avg' => '$response_time']
+          ,'total_trip_time' => ['$sum' => '$milliseconds']
+          ,'avg_trip_time' => ['$avg' => '$milliseconds']
+          ,'total_trip_time_Lte10k' => ['$sum' => '$millisecondsLte10k']
+          ,'avg_trip_time_Lte10k' => ['$avg' => '$millisecondsLte10k']
         ]
       ]
     ]);
@@ -204,10 +235,30 @@ class CachetIO {
     self::createMetricPoint($this->startMetricId+4,$metrics[0]['avg_mi']);
     self::createMetricPoint($this->startMetricId+5,$metrics[0]['total_km']);
     self::createMetricPoint($this->startMetricId+6,$metrics[0]['avg_km']);
-    self::createMetricPoint($this->startMetricId+7,$metrics[0]['avg_time']);
+    self::createMetricPoint($this->startMetricId+7,$metrics[0]['avg_response_time']);
+
+    // the following are only available in V2
+    if(!empty($metrics[0]['total_trip_time'])){
+      $metrics[0]['total_trip_time'] = $metrics[0]['total_trip_time']/1000; //to seconds
+      self::createMetricPoint($this->startMetricId+8,$metrics[0]['total_trip_time']);
+    }
+    if(!empty($metrics[0]['avg_trip_time'])){
+      $metrics[0]['avg_trip_time'] = $metrics[0]['avg_trip_time']/1000; //to seconds
+      self::createMetricPoint($this->startMetricId+9,$metrics[0]['avg_trip_time']);
+    }
+    if(!empty($metrics[0]['total_trip_time_Lte10k'])){
+      $metrics[0]['total_trip_time_Lte10k'] = $metrics[0]['total_trip_time_Lte10k']/1000; //to seconds
+      self::createMetricPoint($this->startMetricId+10,$metrics[0]['total_trip_time_Lte10k']);
+    }
+    if(!empty($metrics[0]['avg_trip_time_Lte10k'])){
+      $metrics[0]['avg_trip_time_Lte10k'] = $metrics[0]['avg_trip_time_Lte10k']/1000; //to seconds
+      self::createMetricPoint($this->startMetricId+11,$metrics[0]['avg_trip_time_Lte10k']);
+    }
 
     // clear metrics from this date
     self::clearMetrics($date);
+
+    return $metrics[0];
   }
 
   public function clearMetrics($date){

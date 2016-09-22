@@ -81,8 +81,8 @@ class MailHops{
 			$app_version=isset($_GET['a'])?$_GET['a']:'';
 
 		//setup geoip
-		if(file_exists(str_replace('/v2/lib','',__DIR__)."/geoip/GeoLite2-City.mmdb"))
-			$this->gi = new Reader(str_replace('/v2/lib','',__DIR__)."/geoip/GeoLite2-City.mmdb");
+		if(file_exists(__DIR__."/../../geoip/GeoLite2-City.mmdb"))
+			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
 
 		//setup dnsbl
 		if(function_exists('Net_DNSBL')){
