@@ -258,8 +258,9 @@ class MailHops{
 		'response'=>array(
 			'distance'=>array(
 				'miles'=>$this->total_miles
-				,'kilometers'=>$this->total_kilometers)
+				,'kilometers'=>$this->total_kilometers
 				,'milliseconds'=>$this->trip_time_milliseconds
+			)
 			,'route'=>$mail_route))
 		);
 	}

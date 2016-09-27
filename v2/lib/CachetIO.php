@@ -51,7 +51,7 @@ class CachetIO {
         ,'description' => 'Total hops per email'
         ,'suffix' => 'hops'
         ,'default_value' => 0
-        ,'display_chart' => 1
+        ,'display_chart' => 0
         ,'calc_type' => 0]
       ,['name' => 'Average Hops'
         ,'description' => 'Average hops per email'
@@ -63,7 +63,7 @@ class CachetIO {
         ,'description' => 'Total miles traveled'
         ,'suffix' => 'mi'
         ,'default_value' => 0
-        ,'display_chart' => 1
+        ,'display_chart' => 0
         ,'calc_type' => 0]
       ,['name' => 'Average Miles'
         ,'description' => 'Average miles traveled per email'
