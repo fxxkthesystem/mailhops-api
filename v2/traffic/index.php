@@ -26,10 +26,9 @@ if(isset($_SERVER['HTTP_REFERER']) &&
   $mailhops = new MailHops();
   $since = date('U')-3;
 
-  try{
+  try {
   	$traffic = $mailhops->getTraffic($since);
-  }
-  catch(Exception $ex){
+  } catch(Exception $ex){
   	error_log($ex->getMessage());
   }
   sendMsg($serverTime,json_encode($traffic));

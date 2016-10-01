@@ -168,7 +168,7 @@ class MailHops{
 					$route['host']=$hostname;
 				if($whois || (!$is_mailhops_site && !$dnsbl_checked && $ip==$dnsbl_ip)){
 					$dnsbl_checked=true;
-					// $route['dnsbl']=self::getDNSBL($ip);
+					$route['dnsbl']=self::getDNSBL($ip);
 				}
 
 				if(!empty($route['countryCode'])){
@@ -250,7 +250,7 @@ class MailHops{
 		$mail_route[]=$client_route;
 
 	//json_encode the route
-	return json_encode(array(
+	return array(
 		'meta'=>array(
 			'code'=>200
 			,'time'=>$total_time
@@ -261,7 +261,7 @@ class MailHops{
 				,'kilometers'=>$this->total_kilometers
 				,'milliseconds'=>$this->trip_time_milliseconds
 			)
-			,'route'=>$mail_route))
+			,'route'=>$mail_route)
 		);
 	}
 
@@ -523,11 +523,12 @@ class MailHops{
 
 	}
 
-	public function getTraffic($since){
+	public function getTraffic($since=''){
 		if(!$this->connection)
 			return false;
-
-		$query = array('date'=>array('$gte'=>(int)$since));
+		$query = [];
+		if(!empty($since) && is_numeric($since))
+			$query = ['date'=>['$gte'=>(int)$since]];
 
 		$collection = $this->connection->getConn()->traffic;
 		$cursor = $collection->find($query,array('sort'=>array('date'=>-1),'limit'=>50));

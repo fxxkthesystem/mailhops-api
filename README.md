@@ -40,7 +40,8 @@ bower install
 
 # on MaxOSX if you want mongo
 brew install mongodb
-pecl install mongodb
+brew install php70
+brew install php70-mongodb
 
 # Import default collections
 mongorestore -h [host:port] -d mailhops -u [user] -p [pass] mongo/mailhops/

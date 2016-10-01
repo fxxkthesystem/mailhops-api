@@ -220,7 +220,7 @@ angular.module('mailHops',['ui.router'])
 
   $scope.startMonitor = function(){
 
-    if (!!window.EventSource && !$state.event_source) {
+    if (!!window.EventSource && !$scope.event_source) {
       $scope.event_source = new EventSource('/v2/traffic');
       var traffic, hops, coords, route;
       $scope.event_source.addEventListener('message', function(e) {
@@ -232,6 +232,8 @@ angular.module('mailHops',['ui.router'])
             route = _.filter(hops.route, function(h){
               return (!!h.lat && !!h.lng);
             });
+            if(!route.length)
+              return;
             $scope.routes.push({
               id: e.lastEventId,
               number: route.length,
@@ -260,7 +262,8 @@ angular.module('mailHops',['ui.router'])
   };
 
   $scope.stopMonitor = function(){
-    $scope.event_source.close();
+    if($scope.event_source)
+      $scope.event_source.close();
   };
 
   // Start the monitor
