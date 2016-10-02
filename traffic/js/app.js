@@ -33,12 +33,23 @@ angular.module('mailHops',['ui.router'])
     return input;
   }
 })
-.controller('mainController', function ($scope, $filter, $state) {
+.factory('MailService', function($http, $q, $filter){
+  var event_source;
+
+  return {
+    getEventSource: function(){
+      return event_source;
+    },
+    setEventSource: function(e){
+      return event_source = e;
+    }
+  }
+})
+.controller('mainController', function ($scope, $filter, $state, $timeout, MailService) {
 
   $scope.routes = [];
   $scope.units = 'mi';
   $scope.page = $state.current.name;
-  $scope.event_source;
 
   var width = 960,
       height = 600;
@@ -207,66 +218,72 @@ angular.module('mailHops',['ui.router'])
   else
     d3_draw_WORLD(d3.select('#map'));
 
-  $scope.monitor = function(){
-    if(!!$scope.event_source){
-      if($scope.event_source.readyState==2)
+  $scope.monitor = function(force){
+    if(MailService.getEventSource() && force){
+      if(MailService.getEventSource().readyState == 2)
         $scope.startMonitor();
       else
-        $scope.stopMonitor();
-    } else if(!$state.event_source){
+        MailService.getEventSource().close();
+    } else if(!MailService.getEventSource()){
       $scope.startMonitor();
     }
   };
 
+  $scope.isMonitorRunning = function(){
+    if(MailService.getEventSource() && MailService.getEventSource().readyState <= 1)
+      return true;
+    else
+      return false;
+  };
+
   $scope.startMonitor = function(){
-
-    if (!!window.EventSource && !$scope.event_source) {
-      $scope.event_source = new EventSource('/v2/traffic');
-      var traffic, hops, coords, route;
-      $scope.event_source.addEventListener('message', function(e) {
-        if(!e.data)
-          return;
-        traffic = JSON.parse(e.data);
-        if(!!traffic){
-          _.each(traffic,function(hops){
-            route = _.filter(hops.route, function(h){
-              return (!!h.lat && !!h.lng);
-            });
-            if(!route.length)
-              return;
-            $scope.routes.push({
-              id: e.lastEventId,
-              number: route.length,
-              distance: hops.distance,
-              time: hops.time,
-              date: $filter('date')(new Date(e.lastEventId*1000),'medium'),
-              host: !!route[0].host ? route[0].host : '',
-              firstHop: route[0],
-              lastHop: route[route.length-1]
-            });
-            if($scope.routes.length > 10)
-              $scope.routes.shift();
-            $scope.$apply();
-            coords = route.map(function(h){
-              return [h.lng, h.lat];
-            });
-            d3_traffic(d3.select('#map'), route, coords);
-          });
-        }
-      }, false);
-
-      $scope.event_source.addEventListener('error', function(e) {
-        $state.error=e;
-      }, false);
+    if (!!window.EventSource) {
+      if(MailService.getEventSource())
+        MailService.getEventSource().close();
+      MailService.setEventSource( new EventSource('/v2/traffic') );
+      MailService.getEventSource().addEventListener('message', function(e){ $scope.messageListener(e); }, false);
+      MailService.getEventSource().addEventListener('error', function(e) {$state.error=e;}, false);
     }
   };
 
-  $scope.stopMonitor = function(){
-    if($scope.event_source)
-      $scope.event_source.close();
+  $scope.messageListener = function(e){
+
+      if(!e.data)
+        return;
+
+      traffic = JSON.parse(e.data);
+
+      if(!!traffic){
+        _.each(traffic,function(hops){
+          route = _.filter(hops.route, function(h){
+            return (!!h.lat && !!h.lng);
+          });
+          if(!route.length)
+            return;
+          $scope.routes.push({
+            id: e.lastEventId,
+            number: route.length,
+            distance: hops.distance,
+            time: hops.time,
+            date: $filter('date')(new Date(e.lastEventId*1000),'medium'),
+            host: !!route[0].host ? route[0].host : '',
+            firstHop: route[0],
+            lastHop: route[route.length-1]
+          });
+          if($scope.routes.length > 20)
+            $scope.routes.shift();
+          $scope.$apply();
+          coords = route.map(function(h){
+            return [h.lng, h.lat];
+          });
+          d3_traffic(d3.select('#map'), route, coords);
+        });
+      }
   };
 
   // Start the monitor
-  $scope.monitor();
+  if(!MailService.getEventSource() || MailService.getEventSource().readyState <= 1){
+    $scope.startMonitor();
+  }
 
 });

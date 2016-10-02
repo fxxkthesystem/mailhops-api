@@ -531,7 +531,7 @@ class MailHops{
 			$query = ['date'=>['$gte'=>(int)$since]];
 
 		$collection = $this->connection->getConn()->traffic;
-		$cursor = $collection->find($query,array('sort'=>array('date'=>-1),'limit'=>50));
+		$cursor = $collection->find($query,array('sort'=>array('date'=>-1)));
 		if(!empty($cursor))
 			return $cursor->toArray();
 		return [];
