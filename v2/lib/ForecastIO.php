@@ -47,18 +47,18 @@ class ForecastIO {
 			return '';
 
 		try {
-			$res = $this->client->request('GET','https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
+			$res = $this->client->request('GET','https://api.darksky.net/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
 
 			if($res->getStatusCode() == 200)
 			{
-				$return = json_encode($res->getBody());
+				$return = json_decode($res->getBody());
 
-				if(!empty($return['currently']))
+				if(!empty($return->currently))
 					return array(
-							'time'=>$return['currently']['time']
-							,'icon'=>$return['currently']['icon']
-							,'summary'=>$return['currently']['summary']
-							,'temp'=>$return['currently']['temperature']
+							'time'=>$return->currently->time
+							,'icon'=>$return->currently->icon
+							,'summary'=>$return->currently->summary
+							,'temp'=>$return->currently->temperature
 						);
 			}
 		} catch(GuzzleHttp\Exception\ClientException $ex){

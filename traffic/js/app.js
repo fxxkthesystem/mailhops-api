@@ -33,6 +33,21 @@ angular.module('mailHops',['ui.router'])
     return input;
   }
 })
+.filter('formatTime',function(){
+  return function(time){
+    if(time){
+      time = time/1000;
+      if(time < 60){
+        time = time+' sec';
+      } else if(time < 3600){
+        time = Math.round(time/60)+' min';
+      } else {
+        time = Math.round(time/60/60)+' hr';
+      }
+    }
+    return time;
+  }
+})
 .factory('MailService', function($http, $q, $filter){
   var event_source;
 

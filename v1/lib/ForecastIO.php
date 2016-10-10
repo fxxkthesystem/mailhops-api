@@ -7,7 +7,8 @@
  */
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
+use GuzzleHttp\HandlerStack;
+use Kevinrob\GuzzleCache\CacheMiddleware;
 
 class ForecastIO {
 
@@ -26,8 +27,14 @@ class ForecastIO {
 			$this->api_key = $args['api_key'];
 		}
 
-		$this->client = new Client();
-		CacheSubscriber::attach($this->client);
+		// Create default HandlerStack
+		$stack = HandlerStack::create();
+
+		// Add this middleware to the top with `push`
+		$stack->push(new CacheMiddleware(), 'cache');
+
+		// Initialize the client with the handler option
+		$this->client = new Client(['handler' => $stack]);
 
 		if(!empty($args['unit']) && $args['unit']=='km'){
 			$this->units = 'uk';
@@ -40,18 +47,18 @@ class ForecastIO {
 			return '';
 
 		try {
-			$res = $this->client->request('GET','https://api.forecast.io/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
+			$res = $this->client->request('GET','https://api.darksky.net/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
 
 			if($res->getStatusCode() == 200)
 			{
-				$return = json_encode($res->getBody());
+				$return = json_decode($res->getBody());
 
-				if(!empty($return['currently']))
+				if(!empty($return->currently))
 					return array(
-							'time'=>$return['currently']['time']
-							,'icon'=>$return['currently']['icon']
-							,'summary'=>$return['currently']['summary']
-							,'temp'=>$return['currently']['temperature']
+							'time'=>$return->currently->time
+							,'icon'=>$return->currently->icon
+							,'summary'=>$return->currently->summary
+							,'temp'=>$return->currently->temperature
 						);
 			}
 		} catch(GuzzleHttp\Exception\ClientException $ex){

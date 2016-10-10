@@ -234,7 +234,13 @@ class MailHops{
 				$client_route=$route;
 			}
 		} else if(self::isPrivate($this->client_ip)) {
-			$client_route=array('ip'=>$this->client_ip,'private'=>true,'local'=>true,'client'=>true,'image'=>self::IMAGE_URL.'email_end.png','hopnum'=>$hopnum);
+			$client_route=array('ip'=>$this->client_ip
+													,'private'=>true
+													,'local'=>true
+													,'client'=>true
+													,'image'=>self::IMAGE_URL.'email_end.png'
+													,'hopnum'=>$hopnum
+												);
 		}
 	}
 	//track end time

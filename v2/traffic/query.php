@@ -6,8 +6,9 @@ if (!$loader = @include __DIR__ . '/../vendor/autoload.php') {
 
 $json_map = '';
 
-$mailhops = new MailHops(!empty($_GET['since'])?$_GET['since']:'');
-$traffic = $mailhops->getTraffic();
+$mailhops = new MailHops();
+$traffic = $mailhops->getTraffic(!empty($_GET['since'])?$_GET['since']:'');
+
 if(MError::hasError()){
   header('HTTP/1.1 400 Bad Request', true, 400);
   $json_map = json_encode(array('error'=>array('code'=>400,'message'=>MError::getError())));
