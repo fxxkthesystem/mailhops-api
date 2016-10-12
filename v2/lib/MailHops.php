@@ -187,9 +187,8 @@ class MailHops{
 				//just get the weather for the sender location
 				if(!$got_weather
 						&& $this->forecast
-						&& isset($route['lat'])
-						&& isset($route['lng'])
-						&& ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
+						&& !empty($route['coords'])
+						&& ($weather = $this->forecast->getForecast($route['coords'][1],$route['coords'][0])) !=''){
 					$route['weather']=$weather;
 					$got_weather=true;
 				}
@@ -399,8 +398,7 @@ class MailHops{
 				if(!empty($location)){
 
 					$loc_array=array('ip'=>"$ip"
-									,'lat'=>$location->location->latitude
-									,'lng'=>$location->location->longitude
+									,'coords'=>[$location->location->longitude,$location->location->latitude]
 									,'city'=>(self::getLanguageValue($location->city->names) != '') ? self::getLanguageValue($location->city->names) : self::parseCityFromTimeZone($location->location->timeZone)
 									,'state'=>(!self::displayState($location->mostSpecificSubdivision->isoCode) && self::getLanguageValue($location->country->names) !='')
 										?utf8_encode(self::getLanguageValue($location->country->names))
@@ -423,17 +421,15 @@ class MailHops{
 			//get ip from google
 			if(!empty($loc_array['countryCode'])
 				&& !empty($loc_array['city'])
-				&& empty($loc_array['lat'])
-				&& empty($loc_array['lng'])){
+				&& empty($loc_array['coords'])){
 					$loc_array = $this->google->GeoCode($loc_array);
 			}
 			//get distance from last location
 			if(!empty($this->last_location)
 				&& !empty($loc_array['city'])
-				&& !empty($loc_array['lat'])
-				&& !empty($loc_array['lng'])){
+				&& !empty($loc_array['coords'])){
 					if($this->last_location['city']!=$loc_array['city']){
-						$distance = self::getDistance($this->last_location,$loc_array);
+						$distance = Util::getDistance($this->last_location['coords'],$loc_array['coords']);
 						if(!empty($distance)){
 							$this->total_kilometers += $distance;
 							$this->total_miles += ($distance/1.609344);
@@ -443,7 +439,7 @@ class MailHops{
 						$loc_array['distance']=array('from'=>array('hopnum'=>($hopnum-1)),'miles'=>0,'kilometers'=>0);
 					}
 					$this->last_location=$loc_array;
-			} else if(!empty($loc_array['lat']) && !empty($loc_array['lng'])){
+			} else if(!empty($loc_array['coords'])){
 				$this->last_location=$loc_array;
 			}
 		return $loc_array;
@@ -480,26 +476,6 @@ class MailHops{
 		return preg_match('/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/',$ip);
 	}
 
-	private function getDistance($from, $to, $unit='k') {
-		$lat1 = $from['lat'];
-		$lon1 = $from['lng'];
-		$lat2 = $to['lat'];
-		$lon2 = $to['lng'];
-
-		$lat1 *= (pi()/180);
-		$lon1 *= (pi()/180);
-		$lat2 *= (pi()/180);
-		$lon2 *= (pi()/180);
-
-		$dist = 2*asin(sqrt( pow((sin(($lat1-$lat2)/2)),2) + cos($lat1)*cos($lat2)*pow((sin(($lon1-$lon2)/2)),2))) * 6378.137;
-
-		if ($unit=="m") {
-			$dist = ($dist / 1.609344);
-		}
-
-		return $dist;
-	}
-
 	private function logTraffic($route,$client,$total_time){
 		if(!$this->connection)
 			return false;
@@ -521,10 +497,8 @@ class MailHops{
 		$collection = $this->connection->getConn()->traffic;
 		$collection->insertOne($query);
 
-		if($this->account && $this->account->getUserId()){
-			$query['userId']=new MongoDB\BSON\ObjectID($this->account->getUserId());
-			$collection = $this->connection->getConn()->user_traffic;
-			$collection->insertOne($query);
+		if($this->account){
+			$this->account->logTraffic($query);
 		}
 
 	}
@@ -532,12 +506,47 @@ class MailHops{
 	public function getTraffic($since=''){
 		if(!$this->connection)
 			return false;
+			
 		$query = [];
+		$options = ['sort'=>['date'=>-1]];
+
 		if(!empty($since) && is_numeric($since))
-			$query = ['date'=>['$gte'=>(int)$since]];
+			$query['date'] = ['$gte'=>(int)$since];
+		else if(!empty($_GET['since']) && is_numeric($_GET['since']))
+      $query['date'] = ['$gte'=>(int)$_GET['since']];
+
+		if(!empty($_GET['country']))
+      $query['route.countryName'] = new MongoDB\BSON\Regex('/*'.$_GET['country'].'*/','i');
+
+		if(!empty($_GET['country_code']))
+			$query['route.countryCode'] = new MongoDB\BSON\Regex('/*'.$_GET['country_code'].'*/','i');
+
+		if(!empty($_GET['city']))
+			$query['route.city'] = new MongoDB\BSON\Regex($_GET['city'],'i');
+
+		if(!empty($_GET['state']))
+			$query['route.state'] = new MongoDB\BSON\Regex('/*'.$_GET['state'].'*/','i');
+
+		if(!empty($_GET['host']))
+			$query['route.host'] = new MongoDB\BSON\Regex('/*'.$_GET['host'].'*/','i');
+
+		if(!empty($_GET['ll'])){
+			$latlng = explode(',',$_GET['ll']);
+			if(count($latlng)==2 && is_float($latlng[0]) && is_float($latlng[1])){
+				$query['coords'] = ['$near'=>[(float)$latlng[1],(float)$latlng[0]]
+													 ,'$maxDistance'=>(!empty($_GET['radius']) && is_numeric($_GET['radius'])) ?$_GET['radius'] : 1000];
+			}
+		}
+
+    if(!empty($_GET['limit']) && is_numeric($_GET['limit']))
+      $options['limit']=(int)$_GET['limit'];
+    if(!empty($_GET['skip']) && is_numeric($_GET['skip']))
+      $options['skip']=(int)$_GET['skip'];
 
 		$collection = $this->connection->getConn()->traffic;
-		$cursor = $collection->find($query,array('sort'=>array('date'=>-1)));
+		$cursor = $collection->find($query,$options);
+		$cursor->setTypeMap(['array' => 'array']);
+
 		if(!empty($cursor))
 			return $cursor->toArray();
 		return [];

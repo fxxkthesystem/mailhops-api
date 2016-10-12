@@ -96,7 +96,7 @@ angular.module('mailHops',
             $scope.distance = mailRoute.response.distance.miles;
 
         angular.forEach($scope.route, function(r) {
-            if(r.lat){
+            if(r.coords){
                 r.focus = false;
                 var message = '<strong>#'+r.hopnum+'</strong> ';
                 if(r.city !='')
@@ -104,16 +104,15 @@ angular.module('mailHops',
                 message += (r.state !='') ? r.state : r.countryName;
 
                 //add hop to the markers
-
-                $scope.markers[r.hopnum] = { lat: r.lat
-                                            , lng: r.lng
+                $scope.markers[r.hopnum] = { lat: r.coords[1]
+                                            , lng: r.coords[0]
                                             , message: message
                                             , icon: local_icons.div_icon
                                             , hopnum: r.hopnum
                                             , focus: false
                                         };
                 //add hop to the polyline
-                hopLines.push([r.lat,r.lng]);
+                hopLines.push([r.coords[1],r.coords[0]]);
             }
         });
 

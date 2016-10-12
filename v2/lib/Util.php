@@ -83,4 +83,24 @@ class Util {
 		return $data;
 	}
 
+	public static function getDistance($from, $to, $unit='k') {
+		$lat1 = $from[1];
+		$lon1 = $from[0];
+		$lat2 = $to[1];
+		$lon2 = $to[0];
+
+		$lat1 *= (pi()/180);
+		$lon1 *= (pi()/180);
+		$lat2 *= (pi()/180);
+		$lon2 *= (pi()/180);
+
+		$dist = 2*asin(sqrt( pow((sin(($lat1-$lat2)/2)),2) + cos($lat1)*cos($lat2)*pow((sin(($lon1-$lon2)/2)),2))) * 6378.137;
+
+		if ($unit=="m") {
+			$dist = ($dist / 1.609344);
+		}
+
+		return $dist;
+	}
+
 }

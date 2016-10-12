@@ -28,8 +28,7 @@ class Google {
 			foreach($json_response->results as $result){
 				//get geo
 				if(!empty($result->geometry->location->lat) && !empty($result->geometry->location->lng)){
-					$loc_array['lat']=$result->geometry->location->lat;
-					$loc_array['lng']=$result->geometry->location->lng;
+					$loc_array['coords']=[$result->geometry->location->lng,$result->geometry->location->lat];					
 				}
 			}
 

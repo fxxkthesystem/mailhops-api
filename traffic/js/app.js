@@ -138,19 +138,19 @@ angular.module('mailHops',['ui.router'])
 
   function d3_traffic(el, hops, coords) {
 
-      let colorScale = d3.scale.linear()
-                         .domain(d3.extent(hops, c => c.ts))
-                         .range([0, 0.8]);
+    let colorScale = d3.scale.linear()
+                       .domain(d3.extent(hops, c => c.ts))
+                       .range([0, 0.8]);
 
-      let hopSel = d3.select('svg').selectAll('circle')
-                      .data(hops, (d) => d.lat)
-                      .attr('fill-opacity', c => colorScale(c.ts));
+    let hopSel = d3.select('svg').selectAll('circle')
+                    .data(hops, (d) => d.lat || d.coords[1])
+                    .attr('fill-opacity', c => colorScale(c.ts));
 
-      hopSel.enter().append('circle')
-                     .attr({
-                       'cx': (d) => projection([d.lng, d.lat])[0],
-                       'cy': (d) => projection([d.lng, d.lat])[1]
-                     });
+    hopSel.enter().append('circle')
+                   .attr({
+                     'cx': (d) => projection(d.coords || [d.lng, d.lat])[0],
+                     'cy': (d) => projection(d.coords || [d.lng, d.lat])[1]
+                   });
 
       hopSel.attr({
                'r': 1,
@@ -255,7 +255,7 @@ angular.module('mailHops',['ui.router'])
     if (!!window.EventSource) {
       if(MailService.getEventSource())
         MailService.getEventSource().close();
-      MailService.setEventSource( new EventSource('/v2/traffic') );
+      MailService.setEventSource( new EventSource('/v2/traffic/now') );
       MailService.getEventSource().addEventListener('message', function(e){ $scope.messageListener(e); }, false);
       MailService.getEventSource().addEventListener('error', function(e) {$state.error=e;}, false);
     }
@@ -266,12 +266,12 @@ angular.module('mailHops',['ui.router'])
       if(!e.data)
         return;
 
-      traffic = JSON.parse(e.data);
+      var traffic = JSON.parse(e.data), hops, coords, route;
 
       if(!!traffic){
         _.each(traffic,function(hops){
           route = _.filter(hops.route, function(h){
-            return (!!h.lat && !!h.lng);
+            return ((!!h.lat && !!h.lng) || h.coords);
           });
           if(!route.length)
             return;
@@ -289,7 +289,7 @@ angular.module('mailHops',['ui.router'])
             $scope.routes.shift();
           $scope.$apply();
           coords = route.map(function(h){
-            return [h.lng, h.lat];
+            return h.coords || [h.lng, h.lat];
           });
           d3_traffic(d3.select('#map'), route, coords);
         });
