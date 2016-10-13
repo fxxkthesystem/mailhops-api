@@ -15,4 +15,6 @@ wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz -O
 #unzip file
 if [ -f "geoip/GeoLite2-City.mmdb.gz" ]; then
 	gunzip geoip/GeoLite2-City.mmdb.gz
+	#make a copy
+	cp geoip/GeoLite2-City.mmdb GeoLite2-City2.mmdb
 fi

@@ -57,9 +57,9 @@ class MailHops{
 
 	public function __construct(){
 
-		if(file_exists(__DIR__.'/../../config.json')){
+		if(file_exists(realpath(__DIR__.'/../../config.json'))){
 			//read config file
-			$config = @file_get_contents(__DIR__.'/../../config.json');
+			$config = @file_get_contents(realpath(__DIR__.'/../../config.json'));
 			$this->config = @json_decode($config);
 		}
 
@@ -81,8 +81,13 @@ class MailHops{
 			$app_version=isset($_GET['a'])?$_GET['a']:'';
 
 		//setup geoip
-		if(file_exists(__DIR__."/../../geoip/GeoLite2-City.mmdb"))
-			$this->gi = new Reader(__DIR__."/../../geoip/GeoLite2-City.mmdb");
+		try {
+			if(file_exists(realpath(__DIR__."/../../geoip/GeoLite2-City.mmdb")))
+				$this->gi = new Reader(realpath(__DIR__."/../../geoip/GeoLite2-City.mmdb"));
+		} catch(Exception $ex){
+			if(file_exists(realpath(__DIR__."/../../geoip/GeoLite2-City2.mmdb")))
+				$this->gi = new Reader(realpath(__DIR__."/../../geoip/GeoLite2-City2.mmdb"));
+		}
 
 		//setup dnsbl
 		if(function_exists('Net_DNSBL')){
