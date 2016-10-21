@@ -20,9 +20,9 @@ class CachetIO {
 
   public function __construct($account=null){
 
-		if(file_exists(__DIR__.'/../../config.json')){
+    if(file_exists(realpath(__DIR__.'/../../config.json'))){
 			//read config file
-			$config = @file_get_contents(__DIR__.'/../../config.json');
+			$config = @file_get_contents(realpath(__DIR__.'/../../config.json'));
 			$this->config = @json_decode($config);
 		}
 
@@ -190,13 +190,14 @@ class CachetIO {
     // get metrics from this date
     $date = date('U');
 
-    $other_totals = $this->connection->getConn()->traffic->aggregate([
+    $collection = $this->connection->getConn()->traffic;
+    $other_totals = $collection->aggregate([
       ['$match' => ['date' => ['$lte' => (int)$date]]]
       ,['$project' => [
           'miles' => '$distance.miles'
           ,'kilometers' => '$distance.kilometers'
           ,'milliseconds' => '$distance.milliseconds'
-          ,'millisecondsLte10k' => ['$cond' => [['$lte' => ['$distance.milliseconds',10000]],'$distance.milliseconds',0]]
+          ,'millisecondsLte10k' => ['$cond' => [ [['$gte' => ['$distance.milliseconds',0]],['$lte' => ['$distance.milliseconds',10000]]] ,'$distance.milliseconds',0]]
           ,'hops' => '$route'
           ,'response_time' => '$time'
         ]

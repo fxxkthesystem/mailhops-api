@@ -38,36 +38,42 @@ class Connection
 
 	public function __construct($config){
 
+		if(getenv('MONGO_DB'))
+			$this->db = getenv('MONGO_DB');
+		else if(!empty($config->db))
+			$this->db = $config->db;
+
 		// this takes precendence
 		if(getenv('MONGO_CONNECTION'))
 			$this->connectionString = getenv('MONGO_CONNECTION');
 		else if(!empty($config->connectionString))
 			$this->connectionString = $config->connectionString;
+		else {
+			if(getenv('MONGO_HOST'))
+				$this->host = getenv('MONGO_HOST');
+			if(!empty($config->host))
+				$this->host = $config->host;
 
-		if(getenv('MONGO_HOST'))
-			$this->host = getenv('MONGO_HOST');
-		if(!empty($config->host))
-			$this->host = $config->host;
+			if(getenv('MONGO_PORT'))
+				$this->port = getenv('MONGO_PORT');
+			else if(!empty($config->port))
+				$this->port = $config->port;
 
-		if(getenv('MONGO_PORT'))
-			$this->port = getenv('MONGO_PORT');
-		else if(!empty($config->port))
-			$this->port = $config->port;
+			if(getenv('MONGO_USER'))
+				$this->user = getenv('MONGO_USER');
+			else if(!empty($config->user))
+				$this->user = $config->user;
 
-		if(getenv('MONGO_USER'))
-			$this->user = getenv('MONGO_USER');
-		else if(!empty($config->user))
-			$this->user = $config->user;
+			if(getenv('MONGO_PASS'))
+				$this->pass = getenv('MONGO_PASS');
+			else if(!empty($config->pass))
+				$this->pass = $config->pass;
 
-		if(getenv('MONGO_PASS'))
-			$this->pass = getenv('MONGO_PASS');
-		else if(!empty($config->pass))
-			$this->pass = $config->pass;
-
-		if(getenv('MONGO_DB'))
-			$this->db = getenv('MONGO_DB');
-		else if(!empty($config->db))
-			$this->db = $config->db;
+			if(!empty($this->user) && !empty($this->pass))
+				$this->connectionString = "mongodb://".$this->user.":".$this->pass."@".$this->host.':'.$this->port.'/'.$this->db;
+			else
+				$this->connectionString = "mongodb://".$this->host.':'.$this->port.'/'.$this->db;
+		}
 	}
 
 	public function getConn()
@@ -80,24 +86,28 @@ class Connection
 		return $this->link;
 	}
 
+	public function getConnectionString()
+	{
+		return $this->connectionString;
+	}
+
+	public function getDB()
+	{
+		return $this->db;
+	}
+
 	/*
 	 * Connection functions
 	 * allow these to be called to allow for multiple queries per connection
 	 */
 
-	public function Connect()
-	{
+	public function Connect() {
 		if(!empty($this->conn))
 			return true;
 
 		try
 		{
-			if(!empty($this->connectionString) && !empty($this->connectionString))
-				$link = new MongoDB\Client($this->connectionString);
-			else if(!empty($this->user) && !empty($this->pass))
-				$link = new MongoDB\Client("mongodb://".$this->user.":".$this->pass."@".$this->host.':'.$this->port.'/'.$this->db);
-			else
-				$link = new MongoDB\Client("mongodb://".$this->host.':'.$this->port.'/'.$this->db);
+			$link = new MongoDB\Client($this->connectionString);
 
 			if(!empty($link)){
 				$link->listDatabases();//test the connection
@@ -119,4 +129,13 @@ class Connection
 
 		return false;
 	}
+
+	public function setupIndexes(){
+		if(!$this->conn)
+      return false;
+
+		$collection = $this->conn->traffic;
+		$collection->createIndex(array('route.coords' => '2dsphere'));
+	}
+
 }

@@ -28,8 +28,8 @@
         <td>{{(units=='mi') ? (hop.distance.miles | number : 0) : (hop.distance.kilometers | number : 0) }} {{units}}</td>
         <td>{{(hop.distance.milliseconds) ? (hop.distance.milliseconds | formatTime) : ''}}</td>
         <td>{{hop.date}}</td>
-        <td>{{hop.firstHop.city || hop.firstHop.countryName}}, {{hop.firstHop.state || hop.firstHop.countryCode}}</td>
-        <td>{{hop.lastHop.city || hop.lastHop.countryName}}, {{hop.lastHop.state || hop.lastHop.countryCode}}</td>
+        <td><img ng-src="/images/flags/{{hop.firstHop.countryCode|lowercase}}.png" title="{{hop.firstHop.countryName}}"> {{hop.firstHop.city || hop.firstHop.countryName}}, {{hop.firstHop.state || hop.firstHop.countryCode}}</td>
+        <td><img ng-src="/images/flags/{{hop.lastHop.countryCode|lowercase}}.png" title="{{hop.lastHop.countryName}}"> {{hop.lastHop.city || hop.lastHop.countryName}}, {{hop.lastHop.state || hop.lastHop.countryCode}}</td>
         <td>{{hop.host | formatHost}}</td>
       </tr>
     </tbody>

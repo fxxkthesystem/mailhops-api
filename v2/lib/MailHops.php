@@ -558,7 +558,7 @@ class MailHops{
 	}
 
 	private function logApp($version){
-		if(empty($this->connection))
+		if(!$this->connection)
 			return false;
 
 		$collection = $this->connection->getConn()->stats;

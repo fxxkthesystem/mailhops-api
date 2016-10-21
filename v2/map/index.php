@@ -3,13 +3,13 @@ if (!$loader = @include __DIR__ . '/../vendor/autoload.php') {
     die('Project dependencies missing.  Run composer.');
 }
 
-$mailhops = new MailHops();
-$mailhops->setReverseHost(true);
-
 $map_unit = (!empty($_GET['u']) && in_array($_GET['u'], array('mi','km')))?$_GET['u']:'mi';
 $fkey     = !empty($_GET['fkey'])?$_GET['fkey']:'';
 $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 
+$mailhops = new MailHops();
+$mailhops->setReverseHost(true);
+$route = $mailhops->getRoute();
 ?>
 <!DOCTYPE html>
 <html ng-app="mailHops">
@@ -27,7 +27,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 	<link rel="stylesheet" href="dashboard.css">
   <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
 	<script>
-		var mailRoute = <?php echo $mailhops->getRoute();?>
+		var mailRoute = <?php echo json_encode($route); ?>
 			, mapUnit = '<?php echo $map_unit;?>'
 			, mapProvider = '<?php echo $map_provider;?>';
 	</script>
@@ -35,16 +35,6 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 </head>
 <!-- !Body -->
 <body ng-controller="mainController">
-  <script type="text/ng-template" id="content.html">
-       <div class="modal-header">
-            <h3 class="modal-title">{{title}}</h3>
-            <button class="btn btn-warning modal-close" ng-click="cancel()">Close</button>
-        </div>
-        <div class="modal-body">
-            <div ng-if="url=='twitter'" twitter-timeline="604321882163171328" auto-resize="true" data-tweet-limit="20">Loading tweets...<i class="fa fa-cog fa-spin fa-3x"></i></div>
-            <iframe ng-if="url!='twitter'" ng-src="{{url}}" width="100%" height="100%" frameborder="0"></iframe>
-        </div>
-  </script>
 
 	<nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
@@ -66,11 +56,6 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
             </li>
 	        </ul>
     	   </div>
-          <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a ng-click="open('','twitter','@MailHops')"><i class="fa fa-lg fa-twitter"></i></a></li>
-          </ul>
-        </div>
       </div>
     </nav>
 
@@ -117,8 +102,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 	<script src="/node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
 	<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-  <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
-  <script src="/bower_components/twitter-timeline-angularjs/src/twitter-timeline.js"></script>
+  <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>  
 	<script src="js/app.js?v=2.0.0"></script>
 </body>
 </html>

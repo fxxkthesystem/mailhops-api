@@ -35,16 +35,6 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
 </head>
 <!-- !Body -->
 <body ng-controller="mainController">
-  <script type="text/ng-template" id="content.html">
-       <div class="modal-header">
-            <h3 class="modal-title">{{title}}</h3>
-            <button class="btn btn-warning modal-close" ng-click="cancel()">Close</button>
-        </div>
-        <div class="modal-body">
-            <div ng-if="url=='twitter'" twitter-timeline="604321882163171328" auto-resize="true" data-tweet-limit="20">Loading tweets...<i class="fa fa-cog fa-spin fa-3x"></i></div>
-            <iframe ng-if="url!='twitter'" ng-src="{{url}}" width="100%" height="100%" frameborder="0"></iframe>
-        </div>
-  </script>
 
 	<nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
@@ -65,12 +55,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
               </ul>
             </li>
 	        </ul>
-    	   </div>
-          <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a ng-click="open('','twitter','@MailHops')"><i class="fa fa-lg fa-twitter"></i></a></li>
-          </ul>
-        </div>
+    	   </div>        
       </div>
     </nav>
 

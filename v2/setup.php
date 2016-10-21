@@ -9,8 +9,7 @@ if(file_exists(realpath(__DIR__.'/../config.json'))){
   $config = @file_get_contents(realpath(__DIR__.'/../config.json'));
   $config = @json_decode($config);
 }
-
-echo '<h1>MailHops API V1</h1>';
+echo '<h1>MailHops API V2</h1>';
 echo '<h2>W3W</h2>';
 
 if(!empty($config->w3w->api_key)){
@@ -20,7 +19,7 @@ if(!empty($config->w3w->api_key)){
 }
 
 echo '<br/>';
-echo '<h2>DarkSky/ForecastIO weather</h2>';
+echo '<h2>DarkSky/ForecastIO Weather</h2>';
 
 if(!empty($config->forecastio->api_key)){
   echo 'ForecastIO API key found';
@@ -34,9 +33,11 @@ echo '<h2>MongoDB</h2>';
 $connection = new Connection(!empty($config->mongodb) ? $config->mongodb : null);
 //unset the connection of Connect fails
 if($connection && $connection->Connect()){
-  echo 'Connected!';
+  echo 'Connected!<br>';
+  $connection->setupIndexes();
+  echo 'Indexes Created!';
 } else if(Error::hasError()){
-  echo '<span style="color:red">'.Error::getError().'</span>';  
+  echo '<span style="color:red">'.Error::getError().'</span>';
 }
 
 ?>

@@ -1,7 +1,6 @@
 angular.module('mailHops',
 ['leaflet-directive'
 ,'ui.bootstrap'
-,'twitter.timeline'
 ,'ngCookies'])
 .controller('ModalInstanceCtrl', function ($scope, $sce, $modalInstance, url, title) {
 

@@ -66,7 +66,7 @@ sudo apachectl restart
 php -S 127.0.0.1:8081 -t .
 ```
 
-Test your config http://127.0.0.1:8081/v2/test.php and watch traffic http://127.0.0.1:8081/traffic
+Run the setup http://127.0.0.1:8081/v2/setup.php and watch traffic http://127.0.0.1:8081/traffic
 
 If you get permission denied on AWS EC2 you may need to run,
 
