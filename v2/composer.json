@@ -10,7 +10,6 @@
 			"geoip2/geoip2": "~2.0",
 			"guzzlehttp/guzzle": "~6.2.1",
 			"kevinrob/guzzle-cache-middleware": "^1.4",
-			"mongodb/mongodb": "^1.0.0",
-			"stripe/stripe-php": "3.*"
+			"mongodb/mongodb": "^1.0.0"
 	}
 }

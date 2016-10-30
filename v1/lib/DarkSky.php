@@ -1,5 +1,5 @@
 <?php
-/** ForecastIO Class
+/** DarkSky Class
  *
  * @package	mailhops-api
  * @author  Andrew Van Tassel <andrew@andrewvantassel.com>
@@ -10,7 +10,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use Kevinrob\GuzzleCache\CacheMiddleware;
 
-class ForecastIO {
+class DarkSky {
 
 	private $api_key		= '';
 
@@ -21,8 +21,8 @@ class ForecastIO {
 	public function __construct($args=array()){
 
 		//get api key
-		if(getenv('FORECASTIO_API_KEY')){
-			$this->api_key = getenv('FORECASTIO_API_KEY');
+		if(getenv('DARKSKY_API_KEY')){
+			$this->api_key = getenv('DARKSKY_API_KEY');
 		} else if(!empty($args['api_key'])){
 			$this->api_key = $args['api_key'];
 		}
@@ -44,7 +44,7 @@ class ForecastIO {
 	public function getForecast($lat,$lng){
 		//if no api key return empty string
 		if(empty($this->api_key))
-			return '';
+			return false;
 
 		try {
 			$res = $this->client->request('GET','https://api.darksky.net/forecast/'.$this->api_key.'/'.$lat.','.$lng.'?units='.$this->units);
@@ -62,9 +62,9 @@ class ForecastIO {
 						);
 			}
 		} catch(GuzzleHttp\Exception\ClientException $ex){
-			MError::setError('ForecastIO Error.  Please verify or remove your ForecastIO API Key.');
+			MError::setError('DarkSky Error.  Please verify or remove your DarkSky API Key.');
 		}
-		return '';
+		return false;
 	}
 }
 ?>

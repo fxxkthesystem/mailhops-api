@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/mailhops/mailhops-api/issues"
   },
-  "homepage": "https://github.com/mailhops/mailhops-api#readme",
+  "homepage": "https://mailhops.com",
   "keywords": [
     "email",
     "geoip",
@@ -20,7 +20,8 @@
     "map"
   ],
   "scripts": {
-    "postinstall": "bower install;"
+    "postinstall": "bower install;",
+    "test": "phpunit --bootstrap v1/vendor/autoload.php tests/MailHopsTest; phpunit --bootstrap v2/vendor/autoload.php tests/MailHopsTest"
   },
   "dependencies": {
     "angular": "^1.4.6",

@@ -1,8 +1,5 @@
 geoip
 vendor
-accounts
-Account.php
-indexa.php
 node_modules
 bower_components
 config.json

@@ -102,7 +102,7 @@ $route = $mailhops->getRoute();
 	<script src="/node_modules/angular-leaflet-directive/dist/angular-leaflet-directive.min.js"></script>
 	<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-  <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>  
+  <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
 	<script src="js/app.js?v=2.0.0"></script>
 </body>
 </html>

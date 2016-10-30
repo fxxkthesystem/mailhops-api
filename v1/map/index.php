@@ -55,7 +55,7 @@ $map_provider=isset($_GET['mp'])?$_GET['mp']:'';
               </ul>
             </li>
 	        </ul>
-    	   </div>        
+    	   </div>
       </div>
     </nav>
 

@@ -8,7 +8,7 @@ MailHops is an email route API. It does a few things:
 
 1. Returns a route an email took based on the Received header IP addresses
 1. Returns a map an email took based on the Received header IP addresses
-1. Shows the weather of the sender when you provide a Forecastio API key
+1. Shows the weather of the sender when you provide a [DarkSky](https://darksky.net) API key
 1. Performs DNSBL check on messages
 1. Displays realtime traffic to the API
 1. Post metrics to [Cachethq](https://cachethq.io/) Status page
@@ -49,11 +49,10 @@ mongorestore -h [host:port] -d mailhops -u [user] -p [pass] mongo/mailhops/
 # Add mongodb.so to your php.ini
 echo "extension=mongodb.so" >> /etc/php.ini
 
-# run composer on both v1 and v2
-cd v1/
+cd v1
 composer install
 
-cd v2/
+cd v2
 composer install
 
 # Move and edit the config.json, set mongodb connection string
@@ -72,6 +71,13 @@ If you get permission denied on AWS EC2 you may need to run,
 
 ```sh
 sudo /usr/sbin/setsebool -P httpd_can_network_connect 1
+```
+
+## Testing
+
+```sh
+phpunit --bootstrap v1/vendor/autoload.php tests/MailHopsTest --tap
+phpunit --bootstrap v2/vendor/autoload.php tests/MailHopsTest --tap
 ```
 
 ## Plugins for Postbox and Thunderbird

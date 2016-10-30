@@ -42,7 +42,7 @@ class What3Words {
 
 	public function getWords($lat,$lng){
 		if(empty($this->api_key))
-			return '';
+			return false;
 
 		$fields = array('key'=>$this->api_key, 'position'=>$lat.','.$lng, 'lang'=>$this->language);
 
@@ -59,12 +59,12 @@ class What3Words {
 		} catch(GuzzleHttp\Exception\ClientException $ex){
 			MError::setError('What3Words Error.  Please verify or remove your What3Words API Key.');
 		}
-		return '';
+		return false;
 	}
 
 	public function getWordsCurl($lat,$lng){
 		if(empty($this->api_key))
-			return '';
+			return false;
 
 		$ch = curl_init('http://api.what3words.com/position');
 
@@ -82,7 +82,7 @@ class What3Words {
 
 		if(!empty($return['words']))
 			return array('url'=>'http://w3w.co/'.implode('.', $return['words']),'words'=>$return['words']);
-		return '';
+		return false;
 	}
 };
 ?>

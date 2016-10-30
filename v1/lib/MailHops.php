@@ -49,9 +49,6 @@ class MailHops{
 
 	const IMAGE_URL 			= 'https://api.mailhops.com/images/';
 
-	//path from DOCUMENT_ROOT
-	const IMAGE_DIR 			= '/images/';
-
 	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
 	const DNS_SERVER 			= '208.67.222.222';
 
@@ -102,9 +99,9 @@ class MailHops{
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
 		if($this->config && !empty($_GET['fkey']))
-			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
+			$this->forecast = new DarkSky(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
 		else if(!empty($this->config->forecastio->api_key))
-			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
+			$this->forecast = new DarkSky(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
 		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
 		//unset the connection of Connect fails
@@ -117,6 +114,10 @@ class MailHops{
 		}
 	}
 
+	public function getVersion(){
+		return 1;
+	}
+
 	public function setReverseHost($show){
 		$this->reverse_host=$show;
 	}
@@ -124,7 +125,6 @@ class MailHops{
 	public function getRoute(){
 
 	$show_client = !isset($_GET['c'])?true:Util::toBoolean($_GET['c']);
-	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
 	//track start time
 	$time = microtime();
@@ -158,15 +158,15 @@ class MailHops{
 				$hostname=self::getRHost($ip);
 				if(!empty($hostname))
 					$route['host']=$hostname;
-				if($whois || (!$is_mailhops_site && !$dnsbl_checked && $ip==$dnsbl_ip)){
+				if($whois || (!$dnsbl_checked && $ip==$dnsbl_ip)){
 					$dnsbl_checked=true;
-					// $route['dnsbl']=self::getDNSBL($ip);
+					$route['dnsbl']=self::getDNSBL($ip);
 				}
 
 				if(!empty($route['countryCode'])){
 					if(empty($route['countryName']))
 						$route['countryName']=self::getCountryName($route['countryCode']);
-					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
+					if(file_exists(__DIR__.'/../../images/flags/'.strtolower($route['countryCode']).'.png'))
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
 
@@ -181,7 +181,7 @@ class MailHops{
 						&& $this->forecast
 						&& isset($route['lat'])
 						&& isset($route['lng'])
-						&& ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !=''){
+						&& ($weather = $this->forecast->getForecast($route['lat'],$route['lng'])) !== false){
 					$route['weather']=$weather;
 					$got_weather=true;
 				}
@@ -194,7 +194,7 @@ class MailHops{
 			$route['image']=self::IMAGE_URL;
 			$route['image'].=$hopnum==1?'email_start.png':'email.png';
 
-			if(!empty($route['dnsbl']) && $route['dnsbl']['listed']==true && file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'auth/bomb.png'))
+			if(!empty($route['dnsbl']) && $route['dnsbl']['listed']==true && file_exists(__DIR__.'/../../images/auth/bomb.png'))
 				$route['image'] = self::IMAGE_URL.'auth/bomb.png';
 
 			$mail_route[]=$route;
@@ -214,7 +214,7 @@ class MailHops{
 				if(!empty($route['countryCode'])){
 					if(empty($route['countryName']))
 						$route['countryName']=self::getCountryName($route['countryCode']);
-					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
+					if(file_exists(__DIR__.'/../../images/flags/'.strtolower($route['countryCode']).'.png'))
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
 				$hostname=self::getRHost($this->client_ip);
@@ -243,16 +243,16 @@ class MailHops{
 		$mail_route[]=$client_route;
 
 	//json_encode the route
-	return json_encode(array(
+	return array(
 		'meta'=>array(
 			'code'=>200
 			,'time'=>$total_time
-			,'host'=>$_SERVER['SERVER_NAME']),
-		'response'=>array(
+			,'host'=>!empty($_SERVER['SERVER_NAME'])?$_SERVER['SERVER_NAME']:''
+		),'response'=>array(
 			'distance'=>array(
 				'miles'=>$this->total_miles
 				,'kilometers'=>$this->total_kilometers)
-			,'route'=>$mail_route))
+			,'route'=>$mail_route)
 		);
 	}
 
@@ -393,8 +393,10 @@ class MailHops{
 									,'zip'=>!empty($location->postal->code)?$location->postal->code:''
 									,'countryName'=>self::getLanguageValue($location->country->names)
 									,'countryCode'=>!empty($location->country->isoCode)?$location->country->isoCode:''
-									,'w3w'=>($this->w3w)?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
 								);
+								if($this->w3w && ($words = $this->w3w->getWords($location->location->latitude,$location->location->longitude)) !== false){
+									$loc_array['w3w'] = $words;
+								}
 					}
 			} catch(Exception $ex) {
 				// IP not found, continue and check whois
@@ -419,7 +421,7 @@ class MailHops{
 				&& !empty($loc_array['lat'])
 				&& !empty($loc_array['lng'])){
 					if($this->last_location['city']!=$loc_array['city']){
-						$distance = self::getDistance($this->last_location,$loc_array);
+						$distance = Util::getDistance([$this->last_location['lng'],$this->last_location['lat']],[$loc_array['lng'],$loc_array['lat']]);
 						if(!empty($distance)){
 							$this->total_kilometers += $distance;
 							$this->total_miles += ($distance/1.609344);
@@ -464,26 +466,6 @@ class MailHops{
 
 	public function isPrivate($ip){
 		return preg_match('/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/',$ip);
-	}
-
-	private function getDistance($from, $to, $unit='k') {
-		$lat1 = $from['lat'];
-		$lon1 = $from['lng'];
-		$lat2 = $to['lat'];
-		$lon2 = $to['lng'];
-
-		$lat1 *= (pi()/180);
-		$lon1 *= (pi()/180);
-		$lat2 *= (pi()/180);
-		$lon2 *= (pi()/180);
-
-		$dist = 2*asin(sqrt( pow((sin(($lat1-$lat2)/2)),2) + cos($lat1)*cos($lat2)*pow((sin(($lon1-$lon2)/2)),2))) * 6378.137;
-
-		if ($unit=="m") {
-			$dist = ($dist / 1.609344);
-		}
-
-		return $dist;
 	}
 
 	private function logTraffic($route,$client,$total_time){

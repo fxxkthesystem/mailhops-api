@@ -36,7 +36,7 @@ $connection = new Connection(!empty($config->mongodb) ? $config->mongodb : null)
 if($connection && $connection->Connect()){
   echo 'Connected!';
 } else if(Error::hasError()){
-  echo '<span style="color:red">'.Error::getError().'</span>';  
+  echo '<span style="color:red">'.Error::getError().'</span>';
 }
 
 ?>

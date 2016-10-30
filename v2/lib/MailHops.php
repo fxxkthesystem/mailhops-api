@@ -15,9 +15,6 @@ class MailHops{
 
 	const IMAGE_URL 			= 'https://api.mailhops.com/images/';
 
-	//path from DOCUMENT_ROOT
-	const IMAGE_DIR 			= '/images/';
-
 	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
 	const DNS_SERVER 			= '208.67.222.222';
 
@@ -118,16 +115,20 @@ class MailHops{
 		if(!empty($this->config->w3w->api_key))
 			$this->w3w = new What3Words(array('api_key'=>$this->config->w3w->api_key, 'lang'=>$this->language));
 
-		// Set ForecastIO
+		// Set DarkSky
 		if(!empty($_GET['fkey']))
-			$this->forecast = new ForecastIO(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
+			$this->forecast = new DarkSky(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
 		else if(!empty($this->config->forecastio->api_key))
-			$this->forecast = new ForecastIO(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
+			$this->forecast = new DarkSky(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
 
 		//log the app and version, keep a daily count for stats
 		if(!empty($app_version)){
 			self::logApp($app_version);
 		}
+	}
+
+	public function getVersion(){
+		return 2;
 	}
 
 	public function setReverseHost($show){
@@ -137,7 +138,6 @@ class MailHops{
 	public function getRoute(){
 
 	$show_client = !isset($_GET['c'])?true:Util::toBoolean($_GET['c']);
-	$is_mailhops_site = isset($_GET['test'])?true:false;
 	$whois = isset($_GET['whois'])?true:false;
 	//track start time
 	$time = microtime();
@@ -171,7 +171,7 @@ class MailHops{
 				$hostname=self::getRHost($ip);
 				if(!empty($hostname))
 					$route['host']=$hostname;
-				if($whois || (!$is_mailhops_site && !$dnsbl_checked && $ip==$dnsbl_ip)){
+				if($whois || (!$dnsbl_checked && $ip==$dnsbl_ip)){
 					$dnsbl_checked=true;
 					$route['dnsbl']=self::getDNSBL($ip);
 				}
@@ -179,7 +179,7 @@ class MailHops{
 				if(!empty($route['countryCode'])){
 					if(empty($route['countryName']))
 						$route['countryName']=self::getCountryName($route['countryCode']);
-					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
+					if(file_exists(__DIR__.'/../../images/flags/'.strtolower($route['countryCode']).'.png'))
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
 
@@ -193,7 +193,7 @@ class MailHops{
 				if(!$got_weather
 						&& $this->forecast
 						&& !empty($route['coords'])
-						&& ($weather = $this->forecast->getForecast($route['coords'][1],$route['coords'][0])) !=''){
+						&& ($weather = $this->forecast->getForecast($route['coords'][1],$route['coords'][0])) !== false){
 					$route['weather']=$weather;
 					$got_weather=true;
 				}
@@ -206,7 +206,7 @@ class MailHops{
 			$route['image']=self::IMAGE_URL;
 			$route['image'].=$hopnum==1?'email_start.png':'email.png';
 
-			if(!empty($route['dnsbl']) && $route['dnsbl']['listed']==true && file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'auth/bomb.png'))
+			if(!empty($route['dnsbl']) && $route['dnsbl']['listed']==true && file_exists(__DIR__.'/../../images/auth/bomb.png'))
 				$route['image'] = self::IMAGE_URL.'auth/bomb.png';
 
 			$mail_route[]=$route;
@@ -226,7 +226,7 @@ class MailHops{
 				if(!empty($route['countryCode'])){
 					if(empty($route['countryName']))
 						$route['countryName']=self::getCountryName($route['countryCode']);
-					if(file_exists($_SERVER['DOCUMENT_ROOT'].self::IMAGE_DIR.'flags/'.strtolower($route['countryCode']).'.png'))
+					if(file_exists(__DIR__.'/../../images/flags/'.strtolower($route['countryCode']).'.png'))
 						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
 				}
 				$hostname=self::getRHost($this->client_ip);
@@ -264,8 +264,8 @@ class MailHops{
 		'meta'=>array(
 			'code'=>200
 			,'time'=>$total_time
-			,'host'=>$_SERVER['SERVER_NAME']),
-		'response'=>array(
+			,'host'=>!empty($_SERVER['SERVER_NAME'])?$_SERVER['SERVER_NAME']:''
+		),'response'=>array(
 			'distance'=>array(
 				'miles'=>$this->total_miles
 				,'kilometers'=>$this->total_kilometers
@@ -411,8 +411,10 @@ class MailHops{
 									,'zip'=>!empty($location->postal->code)?$location->postal->code:''
 									,'countryName'=>self::getLanguageValue($location->country->names)
 									,'countryCode'=>!empty($location->country->isoCode)?$location->country->isoCode:''
-									,'w3w'=>($this->w3w)?$this->w3w->getWords($location->location->latitude,$location->location->longitude):""
 								);
+								if($this->w3w && ($words = $this->w3w->getWords($location->location->latitude,$location->location->longitude)) !== false){
+									$loc_array['w3w'] = $words;
+								}
 					}
 			} catch(Exception $ex) {
 				// IP not found, continue and check whois
