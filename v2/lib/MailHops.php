@@ -13,8 +13,6 @@ if(file_exists('Net/DNSBL.php'))
 
 class MailHops{
 
-	const IMAGE_URL 			= 'https://api.mailhops.com/images/';
-
 	//Use opendns, as google dns does not resolve DNSBL and Net/DNSBL is using a deprecated Net/DNS lib
 	const DNS_SERVER 			= '208.67.222.222';
 
@@ -131,6 +129,11 @@ class MailHops{
 		return 2;
 	}
 
+	public function getImageUrl(){
+		$http = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https:' : 'http:';
+		return !empty($_SERVER['HTTP_HOST']) ? $http.'//'.$_SERVER['HTTP_HOST'].'/images/' : '/images/';
+	}
+
 	public function setReverseHost($show){
 		$this->reverse_host=$show;
 	}
@@ -180,7 +183,7 @@ class MailHops{
 					if(empty($route['countryName']))
 						$route['countryName']=self::getCountryName($route['countryCode']);
 					if(file_exists(__DIR__.'/../../images/flags/'.strtolower($route['countryCode']).'.png'))
-						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
+						$route['flag']=self::getImageUrl().'flags/'.strtolower($route['countryCode']).'.png';
 				}
 
 				if(!empty($route['countryCode'])){
@@ -203,11 +206,11 @@ class MailHops{
 			}
 
 			$route['hopnum']=$hopnum;
-			$route['image']=self::IMAGE_URL;
+			$route['image']=self::getImageUrl();
 			$route['image'].=$hopnum==1?'email_start.png':'email.png';
 
 			if(!empty($route['dnsbl']) && $route['dnsbl']['listed']==true && file_exists(__DIR__.'/../../images/auth/bomb.png'))
-				$route['image'] = self::IMAGE_URL.'auth/bomb.png';
+				$route['image'] = self::getImageUrl().'auth/bomb.png';
 
 			$mail_route[]=$route;
 
@@ -227,13 +230,13 @@ class MailHops{
 					if(empty($route['countryName']))
 						$route['countryName']=self::getCountryName($route['countryCode']);
 					if(file_exists(__DIR__.'/../../images/flags/'.strtolower($route['countryCode']).'.png'))
-						$route['flag']=self::IMAGE_URL.'flags/'.strtolower($route['countryCode']).'.png';
+						$route['flag']=self::getImageUrl().'flags/'.strtolower($route['countryCode']).'.png';
 				}
 				$hostname=self::getRHost($this->client_ip);
 				if(!empty($hostname))
 					$route['host']=$hostname;
 				$route['hopnum']=$hopnum;
-				$route['image']=self::IMAGE_URL.'email_end.png';
+				$route['image']=self::getImageUrl().'email_end.png';
 				$route['client']=true;
 				$client_route=$route;
 			}
@@ -242,7 +245,7 @@ class MailHops{
 													,'private'=>true
 													,'local'=>true
 													,'client'=>true
-													,'image'=>self::IMAGE_URL.'email_end.png'
+													,'image'=>self::getImageUrl().'email_end.png'
 													,'hopnum'=>$hopnum
 												);
 		}
