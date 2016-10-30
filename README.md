@@ -75,9 +75,11 @@ sudo /usr/sbin/setsebool -P httpd_can_network_connect 1
 
 ## Testing
 
+https://phpunit.de/
+
 ```sh
-phpunit --bootstrap v1/vendor/autoload.php tests/MailHopsTest --tap
-phpunit --bootstrap v2/vendor/autoload.php tests/MailHopsTest --tap
+phpunit --bootstrap v1/vendor/autoload.php tests/MailHopsTest
+phpunit --bootstrap v2/vendor/autoload.php tests/MailHopsTest
 ```
 
 ## Plugins for Postbox and Thunderbird

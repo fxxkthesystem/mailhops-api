@@ -8,13 +8,18 @@ All notable changes to this project will be documented in this file.
 - Moved composer to v1 and v2 and must be run in each during install
 - Updated GuzzleHttp to 6.2.1
 - Changed Guzzle Cache to work with Guzzle 6.2.1
+- Upgraded to PHP7
 - Updated MongoDB driver
-- Added proper HTTP response codes
+- Updated ForecastIO to [DarkSky](https://darksky.net)
+- Updated HTTP response codes
 
 ### Added
 
+- Support for MongoDB replicsets
 - Realtime traffic map with US and world view
 - Whois + Google fallback to get city/state, lat/lng if IP is not found in MaxMind
+- [Cachet](cachethq.io) status page support
+- [PHPUnit](https://phpunit.de/) tests
 
 ## [1.2.3] - 2015-11-13
 ### Fixed

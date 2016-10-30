@@ -100,8 +100,8 @@ class MailHops{
 
 		if($this->config && !empty($_GET['fkey']))
 			$this->forecast = new DarkSky(array('api_key'=>$_GET['fkey'],'unit'=>$this->unit));
-		else if(!empty($this->config->forecastio->api_key))
-			$this->forecast = new DarkSky(array('api_key'=>$this->config->forecastio->api_key,'unit'=>$this->unit));
+		else if(!empty($this->config->darksky->api_key))
+			$this->forecast = new DarkSky(array('api_key'=>$this->config->darksky->api_key,'unit'=>$this->unit));
 
 		$this->connection = new Connection(!empty($this->config->mongodb) ? $this->config->mongodb : null);
 		//unset the connection of Connect fails
