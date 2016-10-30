@@ -1,6 +1,7 @@
 language: php
 php:
   - '7.0'
+before_install: echo "extension = mongodb.so" >> ~/.phpenv/versions/7.0.12/etc/php.ini  
 script:
   - ./travis.sh
   - npm test
