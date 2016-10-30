@@ -3,7 +3,7 @@
 
 <img src="https://www.mailhops.com/images/logos/logo.png" alt="MailHops logo" title="MailHops" align="right" />
 
-[![Build Status](https://travis-ci.org/MailHops/mailhops-node.svg)](https://travis-ci.org/MailHops/mailhops-node)
+[![Build Status](https://travis-ci.org/MailHops/mailhops-api.svg)](https://travis-ci.org/MailHops/mailhops-api)
 [![Stories in Ready](https://badge.waffle.io/avantassel/mailhops-api.png?label=ready&title=Ready)](https://waffle.io/avantassel/mailhops-api)
 
 MailHops is an email route API. It does a few things:
