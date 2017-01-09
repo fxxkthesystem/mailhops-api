@@ -219,7 +219,7 @@ class MailHops{
 	}
 
 	//get current location
-	if(!empty($this->client_ip)){
+	if($show_client==true && !empty($this->client_ip)){
 
 		$route=array();
 		if(!empty($this->client_ip) && !self::isPrivate($this->client_ip)){
