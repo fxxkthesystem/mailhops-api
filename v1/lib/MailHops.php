@@ -467,7 +467,7 @@ class MailHops{
 	}
 
 	public function isPrivate($ip){
-		return preg_match('/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/',$ip);
+		return preg_match('/(^127\.)|(^192\.168\.)|(^169\.254\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF][cCdD])/',$ip);
 	}
 
 	private function logTraffic($route,$client,$total_time){

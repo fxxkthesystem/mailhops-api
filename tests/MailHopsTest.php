@@ -24,6 +24,8 @@ class MailHopsTest extends TestCase
         $this->assertEquals(0, $response['response']['distance']['miles']);
 
         $this->assertEquals(0, $response['response']['distance']['kilometers']);
+
+        $this->assertEquals(true, $mailhops->isPrivate('169.254.10.10'));
     }
 
     public function testDistance()
