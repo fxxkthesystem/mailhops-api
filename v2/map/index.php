@@ -76,8 +76,8 @@ $route = $mailhops->getRoute();
           			<div ng-if="!r.private">
                   <br/><span ng-if="r.city">{{r.city}}<span ng-if="r.state">, {{r.state}}</span></span>
                   <br/><span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}</span>
-          				<br/><a class="host" href="https://www.mailhops.com/whois/{{r.ip}}" target="_blank">{{r.ip}} <i class="fa fa-bomb" ng-if="!!r.dnsbl.listed"></i></a>
-          				<br/><a ng-if="r.host" class="host" href="https://www.mailhops.com/whois/{{r.ip}}">{{r.host}}</a>
+          				<br/><a class="host" href="https://www.mailhops.com/whois/{{r.ip}}">{{r.ip}} <i class="fa fa-bomb" ng-if="!!r.dnsbl.listed"></i></a>
+          				<br/><a class="host" href="https://www.mailhops.com/whois/{{r.ip}}" ng-if="r.host">{{r.host}}</a>
           			</div>
 
           	</li>
@@ -99,6 +99,6 @@ $route = $mailhops->getRoute();
 	<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="/bower_components/Leaflet.Geodesic/src/L.Geodesic.js"></script>
-	<script src="js/app.js?v=2.0.0"></script>
+	<script src="js/app.js?v=2.0.1"></script>
 </body>
 </html>
