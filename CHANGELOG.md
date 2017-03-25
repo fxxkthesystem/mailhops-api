@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2017-3-24
+
+### Fixed
+- DNSBL icon showing if not listed
+- Removed modal popup
+- link to whois
+
 ## [2.0.0] - 2016-10-12
 
 ### Changed

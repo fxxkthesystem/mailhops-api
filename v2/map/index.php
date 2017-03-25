@@ -74,14 +74,10 @@ $route = $mailhops->getRoute();
                   <br/>
           			</div>
           			<div ng-if="!r.private">
-                  <span ng-if="r.countryName"><img ng-src="{{r.flag}}"/> {{r.countryName}} ({{r.countryCode}})<br/></span>
-                  <span ng-if="r.city">{{r.city}}<span ng-if="r.state">, {{r.state}}</span><br/></span>
-
-                  <span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}<br/></span>
-
-          				<span class="host" ng-click="open('','https://www.mailhops.com/whois/'+r.ip,'whois')">{{r.ip}} <i class="fa fa-bomb" ng-if="r.dnsbl"></i><br/></span>
-          				<span ng-if="r.host" class="host" ng-click="open('','//www.mailhops.com/whois/'+r.ip+'?from=app','whois')">{{r.host}}<br/></span>
-          				<span ng-if="r.w3w" class="words" ng-click="open('',r.w3w.url,'what3words')">{{r.w3w.words.join('.')}}</span>
+                  <br/><span ng-if="r.city">{{r.city}}<span ng-if="r.state">, {{r.state}}</span></span>
+                  <br/><span ng-if="r.weather"><i class="{{r.weather.icon | weather}}"></i> {{r.weather.temp | number:0}}&deg; {{r.weather.summary}}</span>
+          				<br/><a class="host" href="https://www.mailhops.com/whois/{{r.ip}}" target="_blank">{{r.ip}} <i class="fa fa-bomb" ng-if="!!r.dnsbl.listed"></i></a>
+          				<br/><a ng-if="r.host" class="host" href="https://www.mailhops.com/whois/{{r.ip}}">{{r.host}}</a>
           			</div>
 
           	</li>

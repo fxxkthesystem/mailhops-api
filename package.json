@@ -1,6 +1,6 @@
 {
   "name": "mailhops-api",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "An email routing API",
   "main": "index.php",
   "author": "Andrew Van Tassel",

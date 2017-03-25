@@ -2,20 +2,6 @@ angular.module('mailHops',
 ['leaflet-directive'
 ,'ui.bootstrap'
 ,'ngCookies'])
-.controller('ModalInstanceCtrl', function ($scope, $sce, $modalInstance, url, title) {
-
-  if(url == 'twitter'){
-       $scope.url = url;
-  } else {
-       $scope.url = $sce.trustAsResourceUrl(url);
-  }
-
-  $scope.title = title;
-
-  $scope.cancel = function () {
-    $modalInstance.dismiss('cancel');
-  };
-})
 .filter('weather',function(){
     return function(icon){
         var forecast_icons = {'clear-day': {'day':'wi-day-sunny', 'night':'wi-day-sunny'}
@@ -37,7 +23,7 @@ angular.module('mailHops',
         return 'wi '+forecast_icons[icon][time];
     };
 })
-.controller('mainController', function($scope, leafletData, $modal, $cookies) {
+.controller('mainController', function($scope, leafletData, $cookies) {
 
         $scope.route = mailRoute.response.route;
         $scope.map_unit = mapUnit;
@@ -46,27 +32,7 @@ angular.module('mailHops',
         $scope.markers = [];
         $scope.templates = [];
         $scope.distance = '';
-        $scope.modalInstance;
-
-        $scope.open = function (size,url,title) {
-            $scope.url = url;
-            $scope.title = title;
-
-            var modalInstance = $modal.open({
-              animation: true,
-              templateUrl: 'content.html',
-              controller: 'ModalInstanceCtrl',
-              size: size,
-              resolve: {
-                url: function () {
-                  return $scope.url;
-                },title: function () {
-                  return $scope.title;
-                }
-              }
-            });
-        };
-
+        
         var hopLines = [];
         var prevHopFocused;
         var local_icons = { div_icon: {
